@@ -12,10 +12,16 @@ I can be placed before V (5) and X (10) to make 4 and 9.
 X can be placed before L (50) and C (100) to make 40 and 90. 
 C can be placed before D (500) and M (1000) to make 400 and 900.
 Given a roman numeral, convert it to an integer.
+
+Input: s = "III"
+Output: 3
+Explanation: III = 3.
 """
 
 
 class Solution1(object):
+    """61 ms, 16.3 MB"""
+
     vdict = {
         "I": 1,
         "V": 5,
@@ -43,6 +49,8 @@ class Solution1(object):
 
 
 class Solution2(object):
+    """40 ms, 16.2 MB"""
+
     vdict = {
         "I": 1,
         "V": 5,
@@ -67,6 +75,8 @@ class Solution2(object):
 
 
 class Solution3(object):
+    """52 ms, 16.3 MB"""
+
     vdict = {
         "I": 1,
         "V": 5,
