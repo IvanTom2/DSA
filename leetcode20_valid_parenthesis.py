@@ -10,6 +10,7 @@ Every close bracket has a corresponding open bracket of the same type.
 Input: s = "()"
 Output: true
 """
+from line_profiler import profile as cpu_profile
 
 
 class WrongSolution(object):
@@ -38,12 +39,48 @@ class WrongSolution(object):
 
 
 class Solution(object):
+    """27 ms, 16.3 MB"""
+
+    chars = {"(": ")", "{": "}", "[": "]"}
+
     def run(self, string: str) -> bool:
-        pass
+        if len(string) % 2 == 0:
+            stack = []
+            for char in string:
+                if char in self.chars:
+                    stack.append(char)
+                elif not stack or self.chars[stack.pop()] != char:
+                    return False
+
+            return len(stack) == 0
+
+        else:
+            return False
+
+
+class Solution2(object):
+    def run(self, s):
+        if len(s) % 2 != 0:
+            return False
+        opening = set("([{")
+        matches = set([("(", ")"), ("[", "]"), ("{", "}")])
+        stack = []
+
+        for paren in s:
+            if paren in opening:
+                stack.append(paren)
+            else:
+                if len(stack) == 0:
+                    return False
+                last_open = stack.pop()
+                if (last_open, paren) not in matches:
+                    return False
+        return len(stack) == 0
 
 
 if __name__ == "__main__":
     string = "{[]}"
+    string = "{[]}[]()"
 
     sol = Solution()
     print(sol.run(string))
