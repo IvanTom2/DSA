@@ -27,14 +27,27 @@ Output: 2, nums = [1,2,_]
 Explanation: Your function should return k = 2, with the first two elements of nums being 1 and 2 respectively.
 It does not matter what you leave beyond the returned k (hence they are underscores).
 """
+from time_measure import repeater
 
 
 class SimplePythonSolution(object):
+    """
+    Mean time = 0.00165 ms
+    Min time  = 0.00120 ms
+    """
+
+    @repeater()
     def run(self, nums: list[int]) -> list[int]:
         return len(set(nums))
 
 
-class Solution(object):
+class Solution1(object):
+    """
+    Mean time = 0.00479 ms
+    Min time  = 0.00360 ms
+    """
+
+    @repeater()
     def run(self, nums: list[int]) -> list[int]:
         if len(nums) == 0:
             return 0
@@ -53,6 +66,12 @@ class Solution(object):
 
 
 class Solution2(object):
+    """
+    Mean time = 0.00532 ms
+    Min time  = 0.00420 ms
+    """
+
+    @repeater()
     def run(self, nums: list[int]) -> list[int]:
         if len(nums) == 0:
             return 0
@@ -67,6 +86,12 @@ class Solution2(object):
 
 
 class Solution3(object):
+    """
+    Mean time = 0.00522 ms
+    Min time  = 0.00410 ms
+    """
+
+    @repeater()
     def run(self, nums: list[int]) -> list[int]:
         if len(nums) == 0:
             return 0
@@ -84,12 +109,16 @@ class Solution3(object):
 
 
 if __name__ == "__main__":
-    nums = [1, 2, 2, 3, 3, 3, 3, 4]
+    mnums = [1, 2, 2, 3, 3, 3, 3, 4]
     # nums = [1, 2]
 
-    sol = SimplePythonSolution()
-    sol = Solution()
-    sol = Solution2()
-    sol = Solution3()
+    sol0 = SimplePythonSolution()
+    sol1 = Solution1()
+    sol2 = Solution2()
+    sol3 = Solution3()
 
-    print(sol.run(nums))
+    sol0.run(nums=mnums[:])
+    # sol1.run(nums=mnums[:])
+
+    # sol2.run(nums=mnums[:])
+    # sol3.run(nums=mnums[:])

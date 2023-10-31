@@ -6,11 +6,18 @@ If there is no common prefix, return an empty string "".
 Input: strs = ["flower","flow","flight"]
 Output: "fl"
 """
+from time_measure import repeater
 
 
 class Solution1(object):
-    """47 ms, 16.3 MB"""
+    """
+    47 ms, 16.3 MB
 
+    Mean time = 0.01375 ms
+    Min time  = 0.01070 ms
+    """
+
+    @repeater()
     def run(self, strings: list[str]) -> str:
         word_min_len = min(map(len, strings))
 
@@ -26,8 +33,14 @@ class Solution1(object):
 
 
 class Solution2(object):
-    """27 ms, 16.2 MB"""
+    """
+    27 ms, 16.2 MB
 
+    Mean time = 0.00540 ms
+    Min time  = 0.00370 ms
+    """
+
+    @repeater()
     def run(self, strings: list[str]) -> str:
         prefix = ""
 
@@ -46,7 +59,8 @@ class Solution2(object):
 if __name__ == "__main__":
     strings = ["flower", "flow", "flight"]
 
-    sol = Solution1()
-    sol = Solution2()
+    sol1 = Solution1()
+    sol2 = Solution2()
 
-    print(sol.run(strings))
+    sol1.run(strings)
+    sol2.run(strings)

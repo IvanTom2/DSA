@@ -17,10 +17,16 @@ Input: s = "III"
 Output: 3
 Explanation: III = 3.
 """
+from time_measure import repeater
 
 
 class Solution1(object):
-    """61 ms, 16.3 MB"""
+    """
+    61 ms, 16.3 MB
+
+    Mean time = 0.01264 ms
+    Min time  = 0.01140 ms
+    """
 
     vdict = {
         "I": 1,
@@ -43,13 +49,19 @@ class Solution1(object):
 
         return _sum
 
+    @repeater()
     def run(self, string: str) -> int:
         massive = list(map(lambda s: self.vdict[s], string))
         return self.summer(massive)
 
 
 class Solution2(object):
-    """40 ms, 16.2 MB"""
+    """
+    40 ms, 16.2 MB
+
+    Mean time = 0.00806 ms
+    Min time  = 0.00630 ms
+    """
 
     vdict = {
         "I": 1,
@@ -61,6 +73,7 @@ class Solution2(object):
         "M": 1000,
     }
 
+    @repeater()
     def run(self, string: str) -> int:
         number = 0
 
@@ -75,7 +88,12 @@ class Solution2(object):
 
 
 class Solution3(object):
-    """52 ms, 16.3 MB"""
+    """
+    52 ms, 16.3 MB
+
+    Mean time = 0.00692 ms
+    Min time  = 0.00550 ms
+    """
 
     vdict = {
         "I": 1,
@@ -87,6 +105,7 @@ class Solution3(object):
         "M": 1000,
     }
 
+    @repeater()
     def run(self, string: str) -> int:
         number = 0
         previous_number = 0
@@ -106,5 +125,10 @@ if __name__ == "__main__":
     string = "IXIV"
     string = "MCMXCIV"
 
-    sol = Solution3()
-    print(sol.run(string))
+    sol1 = Solution1()
+    sol2 = Solution2()
+    sol3 = Solution3()
+
+    sol1.run(string)
+    sol2.run(string)
+    sol3.run(string)

@@ -8,9 +8,15 @@ Example 1:
 Input: nums = [1,3,5,6], target = 5
 Output: 2
 """
+from time_measure import repeater
 
 
 class Solution(object):
+    """
+    Mean time = 0.00426 ms
+    Min time  = 0.00270 ms
+    """
+
     def binary_search(self, nums: list[int], target: int) -> int:
         start = 0
         end = len(nums) - 1
@@ -28,6 +34,7 @@ class Solution(object):
 
         return start
 
+    @repeater()
     def run(self, nums: list[int], target: int) -> int:
         return self.binary_search(nums, target)
 

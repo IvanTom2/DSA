@@ -5,11 +5,19 @@ Input: x = 121
 Output: true
 Explanation: 121 reads as 121 from left to right and from right to left.
 """
+from time_measure import repeater
+import time
 
 
-class Solution(object):
-    """52 ms, 16.1 MB"""
+class Solution1(object):
+    """
+    52 ms, 16.1 MB
 
+    Mean time = 0.00236 ms
+    Min time  = 0.00210 ms
+    """
+
+    @repeater()
     def run(self, x: int) -> bool:
         origin = list(str(x))
         reverse = origin[::-1]
@@ -17,8 +25,14 @@ class Solution(object):
 
 
 class Solution2(object):
-    """52 ms, 16.1 MB"""
+    """
+    52 ms, 16.1 MB
 
+    Mean time = 0.01471 ms
+    Min time  = 0.01230 ms
+    """
+
+    @repeater()
     def run(self, x: int) -> bool:
         if x >= 0:
             reversed_num = 0
@@ -36,8 +50,14 @@ class Solution2(object):
 
 
 class Solution3(object):
-    """54 ms, 16.3 MB"""
+    """
+    54 ms, 16.3 MB
 
+    Mean time = 0.00925 ms
+    Min time  = 0.00700 ms
+    """
+
+    @repeater()
     def run(self, x: int) -> bool:
         if x < 0 or (x != 0 and x % 10 == 0):
             return False
@@ -51,10 +71,16 @@ class Solution3(object):
 
 
 if __name__ == "__main__":
-    integer = 10
+    start = time.time()
 
-    sol = Solution()
-    sol = Solution2()
-    sol = Solution3()
+    integer = 111111122222222111111
 
-    print(sol.run(integer))
+    sol1 = Solution1()
+    sol2 = Solution2()
+    sol3 = Solution3()
+
+    sol1.run(integer)
+    sol2.run(integer)
+    sol3.run(integer)
+
+    print(time.time() - start)

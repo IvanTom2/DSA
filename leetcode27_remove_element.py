@@ -28,9 +28,16 @@ Output: 2, nums = [2,2,_,_]
 Explanation: Your function should return k = 2, with the first two elements of nums being 2.
 It does not matter what you leave beyond the returned k (hence they are underscores).
 """
+from time_measure import repeater
 
 
 class Solution(object):
+    """
+    Mean time = 0.00351 ms
+    Min time  = 0.00280 ms
+    """
+
+    @repeater()
     def run(self, nums: list[int], val: int) -> int:
         index = 0
 
@@ -46,4 +53,4 @@ if __name__ == "__main__":
     nums = [3, 2, 2, 3]
 
     sol = Solution()
-    print(sol.run(nums, 3))
+    sol.run(nums, 3)
