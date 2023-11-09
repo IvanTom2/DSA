@@ -2,13 +2,19 @@ from abc import ABC
 from typing import Any, Union
 
 
-class SinglyNode(object):
+class AbstractNode(ABC):
     def __init__(self, value: Any, next=None) -> None:
         self.value = value
         self.next = next
 
     def __repr__(self) -> str:
         return f"Node with value {self.value}"
+
+
+class SinglyNode(AbstractNode):
+    def __init__(self, value: Any, next=None) -> None:
+        self.value = value
+        self.next = next
 
 
 class AbstractSinglyListNode(ABC):
@@ -41,9 +47,11 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
 
     def add_head(self, node: Union[SinglyNode, Any]):
         node = self._nodify(node)
-
-        node.next = self.head
-        self.head = node
+        if self.head is None:
+            self.head = node
+        else:
+            node.next = self.head
+            self.head = node
 
     def add_back(self, node: Union[SinglyNode, Any]) -> None:
         """This method return the Error if in the ListNode there isn't head"""
@@ -187,30 +195,32 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
             self.add_head(head_node)
             self.tail = self.head
 
-    def __increment(self, base: int = 1) -> None:
+    def _increment(self, base: int = 1) -> None:
         self.len += base
 
-    def __decrement(self, base: int = 1) -> None:
+    def _decrement(self, base: int = 1) -> None:
         self.len -= base
 
     def _del(self, prevNode: SinglyNode) -> SinglyNode:
         if prevNode is None:
             self.head = self.head.next
-            self.__decrement()
+            self._decrement()
             return self.head
         else:
             nextNode = prevNode.next
             prevNode.next = nextNode.next if nextNode else None
-            self.__decrement()
+            self._decrement()
             return prevNode.next
 
     def _count_len(self, otherSLL: AbstractSinglyListNode) -> int:
         counter = 0
+        tail = None
         node = otherSLL.head
         while node:
             counter += 1
+            tail = node
             node = node.next
-        return counter
+        return counter, tail
 
     def add_head(self, node: Union[SinglyNode, Any]):
         node = self._nodify(node)
@@ -220,14 +230,14 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
         else:
             node.next = self.head
             self.head = node
-        self.__increment()
+        self._increment()
 
     def add_back(self, node: Union[SinglyNode, Any]) -> None:
         """This method return the Error if in the ListNode there isn't head"""
         node = self._nodify(node)
         self.tail.next = node
         self.tail = self.tail.next
-        self.__increment()
+        self._increment()
 
     def find(self, position: int) -> SinglyNode:
         if position >= self.len:
@@ -259,200 +269,88 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
 
             prevNode.next = node
             node.next = nextNode
-            self.__increment()
+            self._increment()
 
     def merge(self, otherSLL: AbstractSinglyListNode) -> None:
-        raise ValueError('TODO: IT IS NOT WORK')
         if self.head is None:
             other_len = 0
             if isinstance(otherSLL, self.__class__):
                 other_len = otherSLL.len
+                other_tail = otherSLL.tail
             else:
-                other_len = self._count_len(otherSLL)
+                other_len, other_tail = self._count_len(otherSLL)
             self.head = otherSLL.head
-            self.__increment(other_len)
+            self.tail = other_tail
+            self._increment(other_len)
 
         else:
             other_len = 0
             if isinstance(otherSLL, self.__class__):
                 other_len = otherSLL.len
+                other_tail = otherSLL.tail
             else:
-                other_len = self._count_len(otherSLL)
+                other_len, other_tail = self._count_len(otherSLL)
 
             self.tail.next = otherSLL.head
-            self.__increment(other_len)
+            self.tail = other_tail
+            self._increment(other_len)
 
 
-class OddSinglyListNode(object):
-    """
-    This hipster kind of List Node is bad because contains len of list
-    and perform operations only with value (not node).
-
-    It's okay if we insert only one node by operation.
-    But it's not okay when we want insert tuple of nodes.
-    """
-
-    def __init__(self, head_value: SinglyNode = None) -> None:
-        self.head: SinglyNode = None
-        self.tail: SinglyNode = None
-        self.len = 0
-
-        if head_value != None:
-            self.add_head(head_value)
-
-    def __increment(self):
-        self.len += 1
-
-    def __decrement(self):
-        self.len -= 1
-
-    def add_head(self, value: int) -> None:
-        """Adding node at the head if the head not exists"""
-        if self.head:
-            raise ValueError("Head node exists")
-
-        self.head = SinglyNode(value)
-        self.tail = self.head
-        self.__increment()
-
-    def add_back(self, value: int) -> None:
-        """Adding node at the tail of ListNode"""
-        node = SinglyNode(value)
-        self.tail.next = node
-        self.tail = node
-        self.__increment()
-
-    def find(self, position: int) -> SinglyNode:
-        node = self.head
-        while position:
-            node = node.next
-            position -= 1
-        return node
-
-    def insert_by_position(self, value: int, position: int) -> None:
-        """
-        Insert node at the position.
-        To insert node at the head use 0.
-        To insert node at the tail use -1.
-        """
-        if position == 0:
-            oldHead = self.head
-            self.head = SinglyNode(value)
-            self.head.next = oldHead
-
-        elif position == -1 or position == self.len:
-            self.add(value)
-
-        else:
-            if position > self.len:
-                raise ValueError("Position > maxlen of ListNode")
-
-            prevNode = self.find(position - 1)
-            nextNode = prevNode.next
-
-            node = SinglyNode(value)
-            prevNode.next = node
-            node.next = nextNode
-
-    def delete_by_position(
-        self,
-        position: int,
-        _return: bool = False,
-    ) -> None:
-        """
-        Delete node by position.
-        To delete node at the head use 0.
-        To delete node at the tail use -1.
-        """
-        if position > self.len:
-            raise ValueError("Position > maxlen of ListNode")
-
-        if position == 0:
-            node = self.head
-            self.head = node.next
-
-        elif position == -1 or position == self.len:
-            node = self.tail
-            prev = self.find(self.len - 2)
-            self.tail = prev
-            self.tail.next = None
-
-        else:
-            prev = self.find(position - 1)
-            node = prev.next
-            prev.next = node.next
-
-        self.__decrement()
-        if _return:
-            return node
-
-    def to_list(self) -> list[SinglyNode]:
-        massive = []
-        node = self.head
-        while node:
-            massive.append(node.value)
-            node = node.next
-
-        return massive
-
-    def from_list(self, massive: list) -> None:
-        start = 0
-        if not self.head:
-            self.add_head(massive[0])
-            start += 1
-
-        for index in range(start, len(massive)):
-            self.add(massive[index])
-
-    def reverse(self) -> None:
-        prev = None
-        oldHead = self.head
-        curr = oldHead
-
-        while curr:
-            next = curr.next
-            curr.next = prev
-            prev = curr
-            curr = next
-
-        self.head = prev
-        self.tail = oldHead
-
-    def __iter__(self):
-        self.cur_node = self.head
-        return self
-
-    def __next__(self):
-        if self.cur_node is None:
-            raise StopIteration
-
-        node = self.cur_node
-        self.cur_node = self.cur_node.next
-
-        return node
-
-    def __repr__(self):
-        return " -> ".join(map(str, self.to_list()))
-
-
-class DoublyNode(object):
+class DoublyNode(AbstractNode):
     def __init__(
         self,
-        value: int,
+        value: Union[int, SinglyNode],
         next=None,
         prev=None,
     ) -> None:
-        self.value = value
         self.next = next
         self.prev = prev
 
+        if isinstance(value, SinglyNode):
+            self.value = value.value
+        else:
+            self.value = value
 
-class DoublyListNode(object):
-    def __init__(self) -> None:
-        pass
+
+class AdvancedDoublyListNode(AdvancedSinglyListNode):
+    def __init__(self, head_node: Union[DoublyNode, Any] = None) -> None:
+        self.head: DoublyNode = None
+        self.tail: DoublyNode = None
+        self.len = 0
+
+        if head_node != None:
+            self.add_head(head_node)
+            self.tail = self.head
+
+    def _nodify(self, entity: Any) -> DoublyNode:
+        if isinstance(entity, DoublyNode):
+            return entity
+        return DoublyNode(entity)
+
+    def add_head(self, node: Union[DoublyNode, Any]):
+        node = self._nodify(node)
+        if self.head is None:
+            self.head = node
+            self.tail = self.head
+        else:
+            node.next = self.head
+            self.head.prev = node
+            self.head = node
+
+        self._increment()
+
+    def add_back(self, node: Union[DoublyNode, Any]) -> None:
+        node = self._nodify(node)
+        prev = self.tail
+
+        self.tail.next = node
+        self.tail = self.tail.next
+        self.tail.prev = prev
+
+        self._increment()
 
 
-if __name__ == "__main__":
+def test_SLL():
     massive = [0, 1, 2, 3, 4, 5]
 
     assl = AdvancedSinglyListNode()
@@ -474,5 +372,21 @@ if __name__ == "__main__":
     assl.merge(assl2)
     assl.merge(assl3)
 
+    assl.reverse()
     print(assl)
-    print(assl.len)
+
+
+if __name__ == "__main__":
+    massive = [0, 1, 2, 3, 4, 5]
+
+    dll = AdvancedDoublyListNode()
+
+    node1 = DoublyNode(1)
+    node2 = DoublyNode(2)
+    node3 = DoublyNode(3)
+
+    dll.add_head(node1)
+    dll.add_back(node2)
+    dll.add_back(node3)
+
+    print(dll.tail)
