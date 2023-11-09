@@ -327,6 +327,39 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
             return entity
         return DoublyNode(entity)
 
+    def _forward_backward(self, position: int) -> int:
+        if position >= 0:
+            forward_paces = position
+            backward_paces = self.len - position
+        else:
+            forward_paces = self.len + position
+            backward_paces = abs(position)
+
+        return forward_paces, backward_paces
+
+    def _ftrav(self, paces: int) -> DoublyNode:
+        node = self.head
+        for _ in range(paces):
+            node = node.next
+        return node
+
+    def _btrav(self, paces: int) -> DoublyNode:
+        node = self.tail
+        for _ in range(paces - 1):
+            node = node.prev
+        return node
+
+    def _del(self, prevNode: DoublyNode) -> DoublyNode:
+        if prevNode is None:
+            self.head = self.head.next
+            self._decrement()
+            return self.head
+        else:
+            nextNode = prevNode.next
+            prevNode.next = nextNode.next if nextNode else None
+            self._decrement()
+            return prevNode.next
+
     def add_head(self, node: Union[DoublyNode, Any]):
         node = self._nodify(node)
         if self.head is None:
@@ -348,6 +381,33 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
         self.tail.prev = prev
 
         self._increment()
+
+    def _traversal(self, position: int) -> DoublyNode:
+        forward_paces, backward_paces = self._forward_backward(position)
+        forward = True if forward_paces <= backward_paces else False
+        paces = min(forward_paces, backward_paces)
+
+        node = self._ftrav(paces) if forward else self._btrav(paces)
+        return node
+
+    def find(self, position: int) -> SinglyNode:
+        if (position >= self.len) or (position < 0 and position < -self.len):
+            raise ValueError("Position > len(ListNode)")
+        elif (position == self.len - 1) or (position == -1):
+            return self.tail
+        elif (position == 0) or (position == -self.len):
+            return self.head
+        else:
+            return self._traversal(position)
+
+    def delpos(
+        self,
+        position: int = None,
+    ) -> SinglyNode:
+        position = position - 1 if position >= 0 else position + 1
+        prevNode = self.find(position)
+        node = self._del(prevNode)
+        return node
 
 
 def test_SLL():
@@ -380,13 +440,14 @@ if __name__ == "__main__":
     massive = [0, 1, 2, 3, 4, 5]
 
     dll = AdvancedDoublyListNode()
+    dll.from_list(massive)
 
-    node1 = DoublyNode(1)
-    node2 = DoublyNode(2)
-    node3 = DoublyNode(3)
+    # node1 = DoublyNode(1)
+    # node2 = DoublyNode(2)
+    # node3 = DoublyNode(3)
 
-    dll.add_head(node1)
-    dll.add_back(node2)
-    dll.add_back(node3)
+    # dll.add_head(node1)
+    # dll.add_back(node2)
+    # dll.add_back(node3)
 
-    print(dll.tail)
+    print(dll.find(2))
