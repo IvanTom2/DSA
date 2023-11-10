@@ -58,10 +58,13 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         node = self._nodify(node)
 
         tail = self.head
-        while tail.next:
-            tail = tail.next
+        if tail:
+            while tail.next:
+                tail = tail.next
 
-        tail.next = node
+            tail.next = node
+        else:
+            self.head = node
 
     def insert(
         self,
