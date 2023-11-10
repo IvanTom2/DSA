@@ -86,9 +86,14 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         self,
         position: int = None,
     ) -> SinglyNode:
-        prevNode = self.find(position - 1)
-        node = self._del(prevNode)
-        return node
+        if position == 0:
+            oldHead = self.head
+            self.head = oldHead.next
+            return oldHead
+        else:
+            prevNode = self.find(position - 1)
+            node = self._del(prevNode)
+            return node
 
     def delval(
         self,
@@ -238,8 +243,11 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
     def add_back(self, node: Union[SinglyNode, Any]) -> None:
         """This method return the Error if in the ListNode there isn't head"""
         node = self._nodify(node)
-        self.tail.next = node
-        self.tail = self.tail.next
+        if self.tail is None:
+            self.add_head(node)
+        else:
+            self.tail.next = node
+            self.tail = self.tail.next
         self._increment()
 
     def find(self, position: int) -> SinglyNode:
@@ -348,7 +356,7 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
 
     def _btrav(self, paces: int) -> DoublyNode:
         node = self.tail
-        for _ in range(paces - 1):
+        for _ in range(paces):
             node = node.prev
         return node
 
@@ -377,11 +385,14 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
 
     def add_back(self, node: Union[DoublyNode, Any]) -> None:
         node = self._nodify(node)
-        prev = self.tail
+        if self.tail is None:
+            self.add_head(node)
+        else:
+            prev = self.tail
 
-        self.tail.next = node
-        self.tail = self.tail.next
-        self.tail.prev = prev
+            self.tail.next = node
+            self.tail = self.tail.next
+            self.tail.prev = prev
 
         self._increment()
 
@@ -442,15 +453,10 @@ def test_SLL():
 if __name__ == "__main__":
     massive = [0, 1, 2, 3, 4, 5]
 
-    dll = AdvancedDoublyListNode()
-    dll.from_list(massive)
+    adll = AdvancedDoublyListNode()
 
-    # node1 = DoublyNode(1)
-    # node2 = DoublyNode(2)
-    # node3 = DoublyNode(3)
+    adll.add_back(SinglyNode(0))
+    adll.add_back(SinglyNode(1))
+    adll.add_back(SinglyNode(2))
 
-    # dll.add_head(node1)
-    # dll.add_back(node2)
-    # dll.add_back(node3)
-
-    print(dll.find(2))
+    print(adll)
