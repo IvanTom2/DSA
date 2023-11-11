@@ -92,8 +92,8 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
             return oldHead
         else:
             prevNode = self.find(position - 1)
-            node = self._del(prevNode)
-            return node
+            self._del(prevNode)
+            return prevNode
 
     def delval(
         self,
@@ -362,14 +362,20 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
 
     def _del(self, prevNode: DoublyNode) -> DoublyNode:
         if prevNode is None:
-            self.head = self.head.next
+            oldHead = self.head
+            self.head = oldHead.next
             self._decrement()
             return self.head
         else:
-            nextNode = prevNode.next
-            prevNode.next = nextNode.next if nextNode else None
+            curNode: DoublyNode = prevNode.next
+            nextNode: DoublyNode = curNode.next if curNode else None
+
+            prevNode.next = nextNode
+            if nextNode is not None:
+                nextNode.prev = prevNode
+
             self._decrement()
-            return prevNode.next
+            return nextNode
 
     def add_head(self, node: Union[DoublyNode, Any]):
         node = self._nodify(node)
@@ -401,10 +407,10 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
         forward = True if forward_paces <= backward_paces else False
         paces = min(forward_paces, backward_paces)
 
-        node = self._ftrav(paces) if forward else self._btrav(paces)
+        node = self._ftrav(paces) if forward else self._btrav(paces - 1)
         return node
 
-    def find(self, position: int) -> SinglyNode:
+    def find(self, position: int) -> DoublyNode:
         if (position >= self.len) or (position < 0 and position < -self.len):
             raise ValueError("Position > len(ListNode)")
         elif (position == self.len - 1) or (position == -1):
@@ -414,14 +420,86 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
         else:
             return self._traversal(position)
 
+    def insert(
+        self,
+        node: Union[DoublyNode, Any],
+        position: int,
+    ) -> None:
+        if position == 0:
+            self.add_head(node)
+        else:
+            node = self._nodify(node)
+
+            prevNode: DoublyNode = self.find(position - 1)
+            nextNode: DoublyNode = prevNode.next
+
+            prevNode.next = node
+            nextNode.prev = node
+
+            node.next = nextNode
+            node.prev = prevNode
+
+            self._increment()
+
     def delpos(
         self,
         position: int = None,
     ) -> SinglyNode:
-        position = position - 1 if position >= 0 else position + 1
-        prevNode = self.find(position)
-        node = self._del(prevNode)
-        return node
+        if (position >= self.len) or (position < 0 and position < -self.len):
+            raise ValueError("Position > len(ListNode)")
+
+        elif (position == 0) or (position == -self.len):
+            oldHead = self.head
+            nextNode: DoublyNode = oldHead.next
+
+            if nextNode is not None:
+                nextNode.prev = None
+
+            self.head = nextNode
+            self._decrement()
+            return oldHead
+
+        elif (position == self.len - 1) or (position == -1):
+            oldTail = self.tail
+            prevNode: DoublyNode = oldTail.prev
+
+            if prevNode is not None:
+                prevNode.next = None
+
+            self.tail = prevNode
+            self._decrement()
+            return oldTail
+
+        else:
+            position = position - 1 if position >= 0 else position - 1
+            prevNode = self.find(position)
+
+            node = self._del(prevNode)
+            return node
+
+    def merge(self, otherSLL: AbstractSinglyListNode) -> None:
+        if self.head is None:
+            other_len = 0
+            if isinstance(otherSLL, self.__class__):
+                other_len = otherSLL.len
+                other_tail = otherSLL.tail
+            else:
+                other_len, other_tail = self._count_len(otherSLL)
+            self.head = otherSLL.head
+            self.tail = other_tail
+            self._increment(other_len)
+
+        else:
+            other_len = 0
+            if isinstance(otherSLL, self.__class__):
+                other_len = otherSLL.len
+                other_tail = otherSLL.tail
+            else:
+                other_len, other_tail = self._count_len(otherSLL)
+
+            self.tail.next = otherSLL.head
+            self.tail = other_tail
+            self._increment(other_len)
 
 
 def test_SLL():
@@ -450,13 +528,17 @@ def test_SLL():
     print(assl)
 
 
+raise ValueError("TODO: impossible to merge Singly and Doubly LL")
+
+
 if __name__ == "__main__":
     massive = [0, 1, 2, 3, 4, 5]
 
-    adll = AdvancedDoublyListNode()
+    sll1 = ClassicSinglyListNode()
+    sll2 = ClassicSinglyListNode()
 
-    adll.add_back(SinglyNode(0))
-    adll.add_back(SinglyNode(1))
-    adll.add_back(SinglyNode(2))
+    sll1.from_list([0, 1, 2])
+    sll2.from_list([3, 4, 5])
 
-    print(adll)
+    sll1.merge(sll2)
+    print(sll1)

@@ -117,11 +117,11 @@ def insert_tests(
     listNode.insert(nodeClass(4), 2)
     listNode.insert(nodeClass(5), 4)
     listNode.insert(nodeClass(6), 0)
-    # listNode.insert(nodeClass(7), 5)
+    listNode.insert(nodeClass(7), 5)
 
-    print(listNode)
+    # print(listNode)
 
-    # compare_to_list(listNode, [6, 3, 2, 4, 1, 7, 5, 0])
+    compare_to_list(listNode, [6, 3, 2, 4, 1, 7, 5, 0])
 
 
 def find_tests(
@@ -137,7 +137,8 @@ def find_tests(
 
     nodes = []
     for index in range(len(massive)):
-        nodes.append(listNode.find(index))
+        node = listNode.find(index)
+        nodes.append(node)
 
     nodes = map(lambda x: x.value, nodes)
     result = map(lambda x: x[0] - x[1], zip(nodes, massive))
@@ -278,15 +279,15 @@ def listNodeTests(
         DoublyNode,
     ],
 ) -> None:
-    # add_head_tests(listNodeClass)
-    # add_back_tests(listNodeClass)
-    # add_head_back_tests(listNodeClass)
-    # find_tests(listNodeClass)
+    add_head_tests(listNodeClass)
+    add_back_tests(listNodeClass)
+    add_head_back_tests(listNodeClass)
+    find_tests(listNodeClass)
     insert_tests(listNodeClass, nodeClass)
-    # delpos_tests(listNodeClass)
-    # delval_tests(listNodeClass)
-    # reverse_tests(listNodeClass)
-    # merge_tests(listNodeClass)
+    delpos_tests(listNodeClass)
+    delval_tests(listNodeClass)
+    reverse_tests(listNodeClass)
+    merge_tests(listNodeClass)
 
 
 def test_CSLL():
@@ -300,6 +301,8 @@ def test_ASLL():
 def test_ADLL():
     listNodeTests(AdvancedDoublyListNode, DoublyNode)
 
+
+raise ValueError("TODO: same tests after merging of LL")
 
 if __name__ == "__main__":
     # test_CSLL()
