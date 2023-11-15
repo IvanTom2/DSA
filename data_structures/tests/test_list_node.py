@@ -219,7 +219,7 @@ def reverse_tests(
     assert massive == listNode.to_list()
 
 
-def merge_tests(
+def merge_sll_tests(
     listNodeClass: Union[
         ClassicSinglyListNode,
         AdvancedSinglyListNode,
@@ -230,7 +230,6 @@ def merge_tests(
     massive2 = [3, 4, 5]
     massive3 = [6, 7, 8]
     massive4 = [9, 10, 11]
-    massive5 = [12, 13, 14]
     mTarget = []
 
     mainNode: ClassicSinglyListNode = listNodeClass()
@@ -239,13 +238,11 @@ def merge_tests(
 
     CSLL = ClassicSinglyListNode()
     ASLL = AdvancedSinglyListNode()
-    ADLL = AdvancedDoublyListNode()
 
     listNode1.from_list(massive1)
     listNode2.from_list(massive2)
     CSLL.from_list(massive3)
     ASLL.from_list(massive4)
-    ADLL.from_list(massive5)
 
     mainNode.merge(listNode1)
     mTarget += massive1
@@ -263,8 +260,31 @@ def merge_tests(
     mTarget += massive4
     assert mainNode.to_list() == mTarget
 
-    mainNode.merge(ADLL)
-    mTarget += massive5
+
+def merge_dll_tests(
+    listNodeClass: Union[
+        ClassicSinglyListNode,
+        AdvancedSinglyListNode,
+        AdvancedDoublyListNode,
+    ]
+):
+    massive1 = [0, 1, 2]
+    massive2 = [3, 4, 5]
+    mTarget = []
+
+    mainNode: AdvancedDoublyListNode = listNodeClass()
+    listNode1: AdvancedDoublyListNode = listNodeClass()
+    listNode2: AdvancedDoublyListNode = listNodeClass()
+
+    listNode1.from_list(massive1)
+    listNode2.from_list(massive2)
+
+    mainNode.merge(listNode1)
+    mTarget += massive1
+    assert mainNode.to_list() == mTarget
+
+    mainNode.merge(listNode2)
+    mTarget += massive2
     assert mainNode.to_list() == mTarget
 
 
@@ -287,7 +307,13 @@ def listNodeTests(
     delpos_tests(listNodeClass)
     delval_tests(listNodeClass)
     reverse_tests(listNodeClass)
-    merge_tests(listNodeClass)
+
+    if isinstance(listNodeClass, ClassicSinglyListNode):
+        merge_sll_tests(listNodeClass)
+    elif isinstance(listNodeClass, AdvancedSinglyListNode):
+        merge_sll_tests(listNodeClass)
+    else:
+        merge_dll_tests(listNodeClass)
 
 
 def test_CSLL():
@@ -302,7 +328,7 @@ def test_ADLL():
     listNodeTests(AdvancedDoublyListNode, DoublyNode)
 
 
-raise ValueError("TODO: same tests after merging of LL")
+# raise ValueError("TODO: same tests after merging of LL")
 
 if __name__ == "__main__":
     # test_CSLL()

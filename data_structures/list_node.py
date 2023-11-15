@@ -17,9 +17,30 @@ class SinglyNode(AbstractNode):
         self.next = next
 
 
+class DoublyNode(AbstractNode):
+    def __init__(
+        self,
+        value: Union[int, SinglyNode],
+        next=None,
+        prev=None,
+    ) -> None:
+        self.next = next
+        self.prev = prev
+
+        if isinstance(value, SinglyNode):
+            self.value = value.value
+        else:
+            self.value = value
+
+
 class AbstractSinglyListNode(ABC):
     def __init__(self, head: SinglyNode = None) -> None:
         self.head: SinglyNode = head
+
+
+class AbstractDoublyListNode(ABC):
+    def __init__(self, head: DoublyNode = None) -> None:
+        self.head: DoublyNode = head
 
 
 class ClassicSinglyListNode(AbstractSinglyListNode):
@@ -29,7 +50,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         self.head: SinglyNode = None
 
         if head_node:
-            self.head = self._nodify(head_node)
+            self.head = self.add_head(head_node)
 
     def _nodify(self, entity: Any) -> SinglyNode:
         if isinstance(entity, SinglyNode):
@@ -53,18 +74,29 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
             node.next = self.head
             self.head = node
 
-    def add_back(self, node: Union[SinglyNode, Any]) -> None:
-        """This method return the Error if in the ListNode there isn't head"""
-        node = self._nodify(node)
-
+    def _find_tail(self) -> SinglyNode:
         tail = self.head
         if tail:
             while tail.next:
                 tail = tail.next
+        return tail
 
-            tail.next = node
+    def _check_class(self, otherSLL: AbstractSinglyListNode) -> None:
+        if isinstance(otherSLL, AbstractSinglyListNode):
+            if isinstance(otherSLL, AbstractDoublyListNode):
+                raise ValueError("Can't merge singly and doubly linked lists")
         else:
+            raise ValueError(f"Can't merge singly linked list and {otherSLL.__class__}")
+
+    def add_back(self, node: Union[SinglyNode, Any]) -> None:
+        """This method return the Error if in the ListNode there isn't head"""
+        node = self._nodify(node)
+
+        if self.head is None:
             self.head = node
+        else:
+            tail = self._find_tail()
+            tail.next = node
 
     def insert(
         self,
@@ -99,7 +131,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         self,
         node: Union[SinglyNode, Any],
         maxdel: int = 0,
-    ):
+    ) -> None:
         delcount = 0
         node = self._nodify(node)
 
@@ -126,7 +158,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
 
         return node
 
-    def reverse(self):
+    def reverse(self) -> None:
         prev = None
         node = self.head
 
@@ -139,12 +171,13 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         self.head = prev
 
     def merge(self, otherSLL: AbstractSinglyListNode) -> None:
+        self._check_class(otherSLL)
+
         if self.head is None:
             self.head = otherSLL.head
+
         else:
-            tail = self.head
-            while tail.next:
-                tail = tail.next
+            tail = self._find_tail()
             tail.next = otherSLL.head
 
     def from_list(self, massive: list) -> None:
@@ -180,7 +213,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         self.cur_node = self.head
         return self
 
-    def __next__(self):
+    def __next__(self) -> SinglyNode:
         if self.cur_node is None:
             raise StopIteration
 
@@ -189,7 +222,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
 
         return node
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return " -> ".join(map(str, self.to_list()))
 
 
@@ -199,7 +232,7 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
         self.tail: SinglyNode = None
         self.len = 0
 
-        if head_node != None:
+        if head_node is not None:
             self.add_head(head_node)
             self.tail = self.head
 
@@ -215,7 +248,7 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
             self._decrement()
             return self.head
         else:
-            nextNode = prevNode.next
+            nextNode: SinglyNode = prevNode.next
             prevNode.next = nextNode.next if nextNode else None
             self._decrement()
             return prevNode.next
@@ -283,6 +316,8 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
             self._increment()
 
     def merge(self, otherSLL: AbstractSinglyListNode) -> None:
+        self._check_class(otherSLL)
+
         if self.head is None:
             other_len = 0
             if isinstance(otherSLL, self.__class__):
@@ -307,29 +342,13 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
             self._increment(other_len)
 
 
-class DoublyNode(AbstractNode):
-    def __init__(
-        self,
-        value: Union[int, SinglyNode],
-        next=None,
-        prev=None,
-    ) -> None:
-        self.next = next
-        self.prev = prev
-
-        if isinstance(value, SinglyNode):
-            self.value = value.value
-        else:
-            self.value = value
-
-
-class AdvancedDoublyListNode(AdvancedSinglyListNode):
+class AdvancedDoublyListNode(AdvancedSinglyListNode, AbstractDoublyListNode):
     def __init__(self, head_node: Union[DoublyNode, Any] = None) -> None:
         self.head: DoublyNode = None
         self.tail: DoublyNode = None
         self.len = 0
 
-        if head_node != None:
+        if head_node is not None:
             self.add_head(head_node)
             self.tail = self.head
 
@@ -377,7 +396,13 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
             self._decrement()
             return nextNode
 
-    def add_head(self, node: Union[DoublyNode, Any]):
+    def _check_class(self, otherDLL: AbstractDoublyListNode) -> None:
+        if isinstance(otherDLL, AbstractDoublyListNode):
+            pass
+        else:
+            raise ValueError(f"Can't merge singly linked list and {otherDLL.__class__}")
+
+    def add_head(self, node: Union[DoublyNode, Any]) -> None:
         node = self._nodify(node)
         if self.head is None:
             self.head = node
@@ -477,27 +502,29 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode):
             node = self._del(prevNode)
             return node
 
-    def merge(self, otherSLL: AbstractSinglyListNode) -> None:
+    def merge(self, otherDLL: AbstractDoublyListNode) -> None:
+        self._check_class(otherDLL)
+
         if self.head is None:
             other_len = 0
-            if isinstance(otherSLL, self.__class__):
-                other_len = otherSLL.len
-                other_tail = otherSLL.tail
+            if isinstance(otherDLL, self.__class__):
+                other_len = otherDLL.len
+                other_tail = otherDLL.tail
             else:
-                other_len, other_tail = self._count_len(otherSLL)
-            self.head = otherSLL.head
+                other_len, other_tail = self._count_len(otherDLL)
+            self.head = otherDLL.head
             self.tail = other_tail
             self._increment(other_len)
 
         else:
             other_len = 0
-            if isinstance(otherSLL, self.__class__):
-                other_len = otherSLL.len
-                other_tail = otherSLL.tail
+            if isinstance(otherDLL, self.__class__):
+                other_len = otherDLL.len
+                other_tail = otherDLL.tail
             else:
-                other_len, other_tail = self._count_len(otherSLL)
+                other_len, other_tail = self._count_len(otherDLL)
 
-            self.tail.next = otherSLL.head
+            self.tail.next = otherDLL.head
             self.tail = other_tail
             self._increment(other_len)
 
@@ -528,17 +555,24 @@ def test_SLL():
     print(assl)
 
 
-raise ValueError("TODO: impossible to merge Singly and Doubly LL")
+# raise ValueError("TODO: impossible to merge Singly and Doubly LL")
 
 
 if __name__ == "__main__":
-    massive = [0, 1, 2, 3, 4, 5]
+    csll = ClassicSinglyListNode()
+    asll = AdvancedSinglyListNode()
+    adll = AdvancedDoublyListNode()
 
-    sll1 = ClassicSinglyListNode()
-    sll2 = ClassicSinglyListNode()
+    if isinstance(adll, ClassicSinglyListNode):
+        print("SAME")
 
-    sll1.from_list([0, 1, 2])
-    sll2.from_list([3, 4, 5])
+    # massive = [0, 1, 2, 3, 4, 5]
 
-    sll1.merge(sll2)
-    print(sll1)
+    # sll1 = ClassicSinglyListNode()
+    # sll2 = ClassicSinglyListNode()
+
+    # sll1.from_list([0, 1, 2])
+    # sll2.from_list([3, 4, 5])
+
+    # sll1.merge(sll2)
+    # print(sll1)
