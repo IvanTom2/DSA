@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Any, Union
+from functools import wraps
 
 
 class AbstractNode(ABC):
@@ -66,14 +67,6 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
             prevNode.next = nextNode.next if nextNode else None
             return prevNode.next
 
-    def add_head(self, node: Union[SinglyNode, Any]):
-        node = self._nodify(node)
-        if self.head is None:
-            self.head = node
-        else:
-            node.next = self.head
-            self.head = node
-
     def _find_tail(self) -> SinglyNode:
         tail = self.head
         if tail:
@@ -88,6 +81,14 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         else:
             raise ValueError(f"Can't merge singly linked list and {otherSLL.__class__}")
 
+    def add_head(self, node: Union[SinglyNode, Any]):
+        node = self._nodify(node)
+        if self.head is None:
+            self.head = node
+        else:
+            node.next = self.head
+            self.head = node
+
     def add_back(self, node: Union[SinglyNode, Any]) -> None:
         """This method return the Error if in the ListNode there isn't head"""
         node = self._nodify(node)
@@ -98,6 +99,15 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
             tail = self._find_tail()
             tail.next = node
 
+    def _insert(self, node: Union[SinglyNode, Any], position: int) -> None:
+        node = self._nodify(node)
+
+        prevNode = self.find(position - 1)
+        nextNode = prevNode.next
+
+        prevNode.next = node
+        node.next = nextNode
+
     def insert(
         self,
         node: Union[SinglyNode, Any],
@@ -106,13 +116,7 @@ class ClassicSinglyListNode(AbstractSinglyListNode):
         if position == 0:
             self.add_head(node)
         else:
-            node = self._nodify(node)
-
-            prevNode = self.find(position - 1)
-            nextNode = prevNode.next
-
-            prevNode.next = node
-            node.next = nextNode
+            self._insert(node, position)
 
     def delpos(
         self,
@@ -298,22 +302,19 @@ class AdvancedSinglyListNode(ClassicSinglyListNode):
 
             return node
 
-    def insert(
+    def _insert(
         self,
         node: Union[SinglyNode, Any],
         position: int,
     ) -> None:
-        if position == 0:
-            self.add_head(node)
-        else:
-            node = self._nodify(node)
+        node = self._nodify(node)
 
-            prevNode = self.find(position - 1)
-            nextNode = prevNode.next
+        prevNode = self.find(position - 1)
+        nextNode = prevNode.next
 
-            prevNode.next = node
-            node.next = nextNode
-            self._increment()
+        prevNode.next = node
+        node.next = nextNode
+        self._increment()
 
     def merge(self, otherSLL: AbstractSinglyListNode) -> None:
         self._check_class(otherSLL)
@@ -445,26 +446,23 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode, AbstractDoublyListNode):
         else:
             return self._traversal(position)
 
-    def insert(
+    def _insert(
         self,
         node: Union[DoublyNode, Any],
         position: int,
     ) -> None:
-        if position == 0:
-            self.add_head(node)
-        else:
-            node = self._nodify(node)
+        node = self._nodify(node)
 
-            prevNode: DoublyNode = self.find(position - 1)
-            nextNode: DoublyNode = prevNode.next
+        prevNode: DoublyNode = self.find(position - 1)
+        nextNode: DoublyNode = prevNode.next
 
-            prevNode.next = node
-            nextNode.prev = node
+        prevNode.next = node
+        nextNode.prev = node
 
-            node.next = nextNode
-            node.prev = prevNode
+        node.next = nextNode
+        node.prev = prevNode
 
-            self._increment()
+        self._increment()
 
     def delpos(
         self,
@@ -528,6 +526,67 @@ class AdvancedDoublyListNode(AdvancedSinglyListNode, AbstractDoublyListNode):
             self.tail = other_tail
             self._increment(other_len)
 
+    def reverse(self) -> None:
+        prev = None
+        oldHead = self.head
+        node = oldHead
+
+        while node:
+            next = node.next
+
+            node.next = prev
+            node.prev = next
+
+            prev = node
+            node = next
+
+        self.head = prev
+        self.tail = oldHead
+
+
+class CircularSinglyListNode(AdvancedSinglyListNode):
+    def __init__(self, head_node: Union[SinglyNode, Any] = None) -> None:
+        super().__init__(head_node)
+
+    def loop_list(self) -> None:
+        self.tail.next = self.head
+
+    def loop_decor(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            output = func(self, *args, **kwargs)
+            self.loop_list()
+            return output
+
+        return wrapper
+
+    @loop_decor
+    def add_back(self, node: SinglyNode | Any) -> None:
+        return super().add_back(node)
+
+    @loop_decor
+    def add_head(self, node: SinglyNode | Any):
+        return super().add_head(node)
+
+    @loop_decor
+    def _insert(self, node: SinglyNode | Any, position: int) -> None:
+        return super()._insert(node, position)
+
+    @loop_decor
+    def merge(self, otherSLL: AbstractSinglyListNode) -> None:
+        return super().merge(otherSLL)
+
+    def to_list(self) -> list[SinglyNode]:
+        head = self.head
+        massive = [head.value]
+
+        node: SinglyNode = self.head.next
+        while node and node != head:
+            massive.append(node.value)
+            node = node.next
+
+        return massive
+
 
 def test_SLL():
     massive = [0, 1, 2, 3, 4, 5]
@@ -555,24 +614,19 @@ def test_SLL():
     print(assl)
 
 
-# raise ValueError("TODO: impossible to merge Singly and Doubly LL")
-
-
 if __name__ == "__main__":
-    csll = ClassicSinglyListNode()
-    asll = AdvancedSinglyListNode()
-    adll = AdvancedDoublyListNode()
+    massive = [0, 1, 2, 3, 4, 5]
 
-    if isinstance(adll, ClassicSinglyListNode):
-        print("SAME")
+    sll = AdvancedDoublyListNode()
 
-    # massive = [0, 1, 2, 3, 4, 5]
+    sll.add_back(0)
+    sll.add_back(1)
+    sll.add_back(2)
+    sll.add_back(3)
+    sll.add_back(4)
 
-    # sll1 = ClassicSinglyListNode()
-    # sll2 = ClassicSinglyListNode()
+    sll.reverse()
 
-    # sll1.from_list([0, 1, 2])
-    # sll2.from_list([3, 4, 5])
-
-    # sll1.merge(sll2)
-    # print(sll1)
+    print(sll)
+    print(sll.head, sll.head.next, sll.head.prev)
+    print(sll.tail, sll.tail.next, sll.tail.prev)

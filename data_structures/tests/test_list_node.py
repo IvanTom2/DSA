@@ -216,6 +216,8 @@ def reverse_tests(
     massive.reverse()
     listNode.reverse()
 
+    print(listNode)
+
     assert massive == listNode.to_list()
 
 
@@ -328,9 +330,7 @@ def test_ADLL():
     listNodeTests(AdvancedDoublyListNode, DoublyNode)
 
 
-# raise ValueError("TODO: same tests after merging of LL")
-
 if __name__ == "__main__":
-    # test_CSLL()
-    # test_ASLL()
+    test_CSLL()
+    test_ASLL()
     test_ADLL()
