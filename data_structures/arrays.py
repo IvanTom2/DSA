@@ -1,6 +1,3 @@
-from functools import reduce
-
-
 class MemoryCell(object):
     def __init__(self, value: int) -> None:
         self.__value = value
