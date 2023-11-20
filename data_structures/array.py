@@ -1,5 +1,4 @@
-import random
-from copy import copy
+from functools import reduce
 
 
 class MemoryCell(object):
@@ -115,9 +114,17 @@ class Array(object):
 
         return returning_value
 
+    def get(self, index: int) -> int:
+        self._index_checkout(index)
+        value = self._access(index).get()
+        return value
+
     @property
     def values(self) -> list[int]:
         return [self._access(i) for i in range(0, self.size)]
+
+    def __getitem__(self, index):
+        return self.get(index)
 
     def __repr__(self) -> str:
         return f"{self.values}"
@@ -149,33 +156,3 @@ class DynamicArray(Array):
 
 def fill_array(array: Array, value_list: list[int]) -> None:
     tuple(map(array.push, value_list))
-
-
-if __name__ == "__main__":
-    array = DynamicArray(10)
-
-    array.push(0)
-    array.push(1)
-    array.push(2)
-    array.push(3)
-
-    array.insert(4, 1)
-    array.insert(5, 1)
-    array.insert(6, 1)
-    array.insert(7, 1)
-
-    array.push(8)
-    array.push(9)
-
-    array.push(10)
-    array.push(11)
-    array.push(12)
-    array.push(13)
-    array.push(14)
-    array.push(15)
-    array.push(16)
-    array.push(17)
-    array.push(18)
-    array.push(19)
-
-    print(array)
