@@ -588,35 +588,7 @@ class CircularSinglyListNode(AdvancedSinglyListNode):
         return massive
 
 
-def test_SLL():
-    massive = [0, 1, 2, 3, 4, 5]
-
-    assl = AdvancedSinglyListNode()
-    assl2 = AdvancedSinglyListNode()
-    assl3 = ClassicSinglyListNode()
-
-    assl.add_head(0)
-    assl.add_back(1)
-    assl.add_back(2)
-
-    assl2.add_head(3)
-    assl2.add_back(4)
-    assl2.add_back(5)
-
-    assl3.add_head(6)
-    assl3.add_back(7)
-    assl3.add_back(8)
-
-    assl.merge(assl2)
-    assl.merge(assl3)
-
-    assl.reverse()
-    print(assl)
-
-
 if __name__ == "__main__":
-    massive = [0, 1, 2, 3, 4, 5]
-
     sll = AdvancedDoublyListNode()
 
     sll.add_back(0)

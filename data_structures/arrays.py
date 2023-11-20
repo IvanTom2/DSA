@@ -152,30 +152,4 @@ def fill_array(array: Array, value_list: list[int]) -> None:
 
 
 if __name__ == "__main__":
-    array = DynamicArray(10)
-
-    array.push(0)
-    array.push(1)
-    array.push(2)
-    array.push(3)
-
-    array.insert(4, 1)
-    array.insert(5, 1)
-    array.insert(6, 1)
-    array.insert(7, 1)
-
-    array.push(8)
-    array.push(9)
-
-    array.push(10)
-    array.push(11)
-    array.push(12)
-    array.push(13)
-    array.push(14)
-    array.push(15)
-    array.push(16)
-    array.push(17)
-    array.push(18)
-    array.push(19)
-
-    print(array)
+    array = Array(10)
