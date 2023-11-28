@@ -1,14 +1,13 @@
-def binary_search(array, item):
-    low, high = 0, len(array)
+def binary_search(array: list[int], value: int) -> int:
+    low, high = 0, len(array) - 1
 
     while low <= high:
-        mid = (low + high) // 2
-        search = array[mid]
+        mid = low + (high - low) // 2
 
-        if search == item:
+        if array[mid] == value:
             return mid
 
-        if search > item:
+        if array[mid] > value:
             high = mid - 1
         else:
             low = mid + 1
@@ -16,7 +15,26 @@ def binary_search(array, item):
     return None
 
 
-if __name__ == "__main__":
-    a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+def insert_binary_search(array: list[int], value: int) -> int:
+    low, high = 0, len(array)
 
-    print(binary_search(a, 5))
+    while low < high:
+        mid = low + (high - low) // 2
+
+        if array[mid] == value:
+            return mid
+
+        if array[mid] > value:
+            high = mid
+        else:
+            low = mid + 1
+
+    return low
+
+
+if __name__ == "__main__":
+    array = [0, 1, 2, 3, 4, 5]
+
+    # print(binary_search(array, 0))
+    pos = insert_binary_search(array, 7)
+    print(pos)

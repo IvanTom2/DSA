@@ -1,4 +1,4 @@
-class ListDeque(object):
+class BasicListDeque(object):
     def __init__(self) -> None:
         self.__storage = []
 
@@ -22,7 +22,7 @@ class ListDeque(object):
 
 
 if __name__ == "__main__":
-    deque = ListDeque()
+    deque = BasicListDeque()
 
     deque.addFirst(0)
     deque.addLast(1)
