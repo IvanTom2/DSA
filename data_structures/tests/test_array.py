@@ -6,41 +6,78 @@ sys.path.append(str(Path(__file__).parent.parent))
 from arrays import Array, DynamicArray
 
 
-def compare_to_list(
-    array: Union[Array, DynamicArray],
-    massive: list,
-    reverse_massive: bool = False,
-):
-    if reverse_massive:
-        if isinstance(massive, list):
-            massive.reverse()
-        else:
-            massive = list(massive)
-            massive.reverse()
+def test_push() -> None:
+    values = [0, 1, 2, 3, 4]
 
-    mList = map(lambda x: x.value, array)
-    result = map(lambda x: x[0] - x[1], zip(mList, massive))
-    assert set(result) == set([0])
+    array = Array(5)
+    lst = list()
+
+    for value in values:
+        array.push(value)
+        lst.append(value)
+
+        assert array.to_list() == lst
 
 
-def test_push(arrayClass: Union[Array, DynamicArray]) -> None:
-    vals = [0, 1, 2, 3, 4]
-    array: Array = arrayClass(len(vals))
+def test_fill_from() -> None:
+    lst = [1, 2, 3, 4, 5]
 
-    for val in vals:
-        array.push(val)
+    array = Array(5)
+    array.fill_from(lst)
 
-    print(array)
-
-    # compare_to_list(array, vals)
+    assert array.to_list() == lst
 
 
-def arrayTests(arrayClass: Union[Array, DynamicArray]) -> None:
-    test_push(arrayClass)
+def test_pop() -> None:
+    values = [1, 2, 3, 4, 5]
+
+    lst = list(values)
+    array = Array(5)
+    array.fill_from(values)
+
+    assert array.to_list() == lst
+
+    for value in lst[::-1]:
+        poped = array.pop()
+        assert poped == value
+
+    assert len(array) == 0
+
+
+def test_remove() -> None:
+    values = [1, 2, 3, 4, 5]
+
+    lst = list(values)
+    array = Array(5)
+    array.fill_from(values)
+
+    assert array.to_list() == lst
+
+    indexes = [4, 2, 0, 1, 0]
+    for index in indexes:
+        arr_val = array.remove(index)
+        list_val = lst.pop(index)
+
+        assert arr_val == list_val
+
+    assert len(array) == 0
+
+
+def test_insert() -> None:
+    lst = [1, 2, 3, 4, 5]
+
+    array = Array(5)
+    array.insert(2, 0)
+    array.insert(3, 1)
+    array.insert(1, 0)
+    array.insert(5, 3)
+    array.insert(4, 3)
+
+    assert lst == array.to_list()
 
 
 def test_Array():
-    arrayTests(Array)
+    test_push()
 
 
 if __name__ == "__main__":
