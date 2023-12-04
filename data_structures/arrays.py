@@ -177,7 +177,7 @@ class Array(object):
     def to_list(self) -> list[int]:
         """Return Python List with current values"""
 
-        return [self.get(i) for i in range(0, self.size)]
+        return [self.get(i) for i in range(0, self.count)]
 
     def fill_from(self, source: Union[tuple, list]) -> None:
         """Filling array with source values"""
@@ -187,6 +187,9 @@ class Array(object):
                 self.push(value)
         else:
             NotImplementedError(f"{source.__class__} not implemented for filling")
+
+    def __len__(self) -> int:
+        return self.count
 
     def __getitem__(self, index: int):
         return self.get(index)
@@ -273,6 +276,7 @@ class SortedArray(object):
 if __name__ == "__main__":
     array = DynamicArray(4)
 
-    array.fill_from([1, 2, 3, 4, 5])
+    array.push(0)
+    array.push(1)
 
     print(array)
