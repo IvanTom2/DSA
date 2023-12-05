@@ -1,5 +1,5 @@
 import base
-from memory_model import Memory, NotAllowedMemoryCell, MemoryCell
+from memory_model import Memory, NotAllowedMemoryCell, MemoryCell, EmptyMemoryCell
 import pytest
 
 
@@ -72,7 +72,10 @@ def test_fail_access(allocated_small_memory):
 
 
 def test_memory_cell():
-    cell = MemoryCell(4)
+    cell = MemoryCell()
+    assert isinstance(cell.get(), EmptyMemoryCell)
+
+    cell.assign(4)
     assert cell.get() == 4
 
     cell.assign(10)
@@ -86,4 +89,4 @@ def test_memory_allocation():
 
     mem.allocate()
     cells = set(mem.storage)
-    cells = set([NotAllowedMemoryCell(), MemoryCell("E")])
+    cells = set([NotAllowedMemoryCell(), MemoryCell()])

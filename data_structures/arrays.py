@@ -1,53 +1,6 @@
 from functools import wraps
 from typing import Union
-
-
-class MemoryCell(object):
-    def __init__(self, value: int) -> None:
-        self.__value = value
-
-    def assign(self, value: int) -> None:
-        self.__value = value
-
-    def get(self) -> int:
-        return self.__value
-
-    def __repr__(self) -> str:
-        return f"{self.get()}"
-
-
-class NotAllowedMemoryCell(MemoryCell):
-    def __init__(self) -> None:
-        self.__value = "_"
-
-    def assign(self, value: int) -> None:
-        raise MemoryError("Assign Segmentation Fault")
-
-    def get(self) -> None:
-        raise MemoryError("Get Segmentation Fault")
-
-    def __repr__(self) -> str:
-        return self.__value
-
-
-class Memory(object):
-    def __init__(self, size: int, large: int = 4) -> None:
-        self._size = size
-
-        self.storage = [NotAllowedMemoryCell() for _ in range(size * large)]
-
-    def access(self, subsript: int) -> MemoryCell:
-        return self.storage[subsript]
-
-    def allocate(self) -> int:
-        low_bound = round((len(self.storage) - self._size) / 2)
-        self.storage[low_bound : low_bound + self._size] = [
-            MemoryCell("E") for _ in range(self._size)
-        ]
-        return low_bound
-
-    def __repr__(self) -> str:
-        return f"{self.storage}"
+from memory_model import Memory, MemoryCell, EmptyMemoryCell
 
 
 class Array(object):
@@ -59,8 +12,8 @@ class Array(object):
         self.low_bound: int
         self.high_bound: int
 
-        self.size = 1 if not size else size
-        self.count = 0
+        self.size = 1 if not size else size  # max size of array
+        self.count = 0  # current size of array
 
         self.__allocate_memory(size)
 
@@ -93,7 +46,7 @@ class Array(object):
 
         if not isinstance(index, int):
             raise IndexError("Index should be integer")
-        if index < 0 or index >= self.size:
+        if index < 0 or index > self.count or index >= self.size:
             raise IndexError("Index out of bound")
 
     def _access(self, index: int) -> MemoryCell:
@@ -109,6 +62,10 @@ class Array(object):
         memory_cell.assign(value)
 
     def _right_shift(self, index: int) -> None:
+        # we should check possibility of shifting right
+        # without overflow
+        self._index_checkout(self.count)
+
         indexer = self.size - 1
         while indexer > index:
             value = self._access(indexer - 1).get()
@@ -143,9 +100,9 @@ class Array(object):
 
     @_size_check
     def insert(self, value: int, index: int) -> None:
-        """Insert value in specified position of array"""
+        """Insert value in specified position of array with right shift"""
 
-        self._index_checkout(self.count)
+        self._index_checkout(index)
         self._right_shift(index)
         self._memory_assignment(value, index)
         self.count += 1
@@ -153,6 +110,7 @@ class Array(object):
     def pop(self) -> int:
         """Remove and return last value of array"""
 
+        self._index_checkout(self.count - 1)
         returning_value = self._access(self.count - 1).get()
         self._memory_assignment(None, self.count - 1)
         self.count -= 1
@@ -168,6 +126,7 @@ class Array(object):
     def remove(self, index: int) -> int:
         """Remove and return value by index"""
 
+        self._index_checkout(self.count - 1)
         returning_value = self.get(index)
         self._left_shift(index)
         self.count -= 1
@@ -274,9 +233,15 @@ class SortedArray(object):
 
 
 if __name__ == "__main__":
-    array = DynamicArray(4)
+    array = Array(4)
 
     array.push(0)
     array.push(1)
+    array.push(2)
 
-    print(array)
+    print(array.remove(0))
+    print(array.remove(0))
+    print(array.remove(0))
+    print(array.remove(0))
+
+    print(array.memory.storage)

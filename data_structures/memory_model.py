@@ -1,12 +1,26 @@
+class EmptyMemoryCell(object):
+    def __init__(self) -> None:
+        self.__value = "E"
+
+    def _get(self) -> str:
+        return self.__value
+
+    def __repr__(self) -> str:
+        return self.__value
+
+
 class MemoryCell(object):
-    def __init__(self, value: int) -> None:
-        self.__value = value
+    def __init__(self) -> None:
+        self.__value = EmptyMemoryCell()
 
     def assign(self, value: int) -> None:
         self.__value = value
 
     def get(self) -> int:
         return self.__value
+
+    def empty(self) -> bool:
+        return
 
     def __repr__(self) -> str:
         return f"{self.get()}"
@@ -38,7 +52,7 @@ class Memory(object):
     def allocate(self) -> int:
         low_bound = round((len(self.storage) - self._size) / 2)
         self.storage[low_bound : low_bound + self._size] = [
-            MemoryCell("E") for _ in range(self._size)
+            MemoryCell() for _ in range(self._size)
         ]
         return low_bound
 
