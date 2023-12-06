@@ -43,7 +43,7 @@ def repeates_count(exec_time: float, min_repetitions: int) -> int:
     return max(repetitions, min_repetitions)
 
 
-def repeater(min_repetitions: int = 10):
+def repeater(min_repetitions: int = 10, max_repetitions: int = None):
     def timer(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -52,6 +52,9 @@ def repeater(min_repetitions: int = 10):
             exec_times.append(exec_time)
 
             repetitions = repeates_count(exec_time, min_repetitions)
+            if max_repetitions is not None:
+                repetitions = min(repetitions, max_repetitions)
+
             for _ in range(repetitions - 1):
                 output, exec_time = exec_func(func, *args, **kwargs)
                 exec_times.append(exec_time)
