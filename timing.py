@@ -3,6 +3,7 @@ import numpy as np
 from functools import wraps
 from copy import deepcopy
 from typing import Callable, Tuple, Any
+from tqdm import tqdm
 
 
 class TimeGradation(object):
@@ -55,7 +56,7 @@ def repeater(min_repetitions: int = 10, max_repetitions: int = None):
             if max_repetitions is not None:
                 repetitions = min(repetitions, max_repetitions)
 
-            for _ in range(repetitions - 1):
+            for _ in tqdm(range(repetitions - 1)):
                 output, exec_time = exec_func(func, *args, **kwargs)
                 exec_times.append(exec_time)
 
