@@ -21,7 +21,6 @@ public:
                 }
             }
         }
-
         return n == 0;
     }
 };
