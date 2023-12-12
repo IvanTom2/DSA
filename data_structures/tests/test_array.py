@@ -1,83 +1,112 @@
 import sys
+import random
+import pytest
 from pathlib import Path
 from typing import Union
 
 sys.path.append(str(Path(__file__).parent.parent))
 from arrays import Array, DynamicArray, SortedArray
-from memory_model import EmptyMemoryCell
-import pytest
 
 
-class TestArray:
+class BaseTestArray(object):
+    @pytest.fixture
+    def array_cls(self):
+        return Array
+
     @pytest.fixture
     def test_values(self):
         return list(range(4))
 
     @pytest.fixture
-    def full_array(self, test_values):
-        values = test_values
-        array = Array(4)
+    def dop_values(self):
+        return list(range(2))
 
-        for value in values:
+    @pytest.fixture
+    def full_array(self, array_cls, test_values):
+        array: Array = array_cls(len(test_values))
+
+        for value in test_values:
             array.push(value)
 
         return array
 
-    def test_push(self):
-        values = range(4)
-        array = Array(4)
+    def test_push(self, array_cls, test_values):
+        array: Array = array_cls(len(test_values))
 
-        for value in values:
+        for value in test_values:
             array.push(value)
 
-        assert array.to_list() == list(values)
+        assert array.to_list() == test_values
 
-    def test_forward_full_insert(self):
-        values = range(4)
-        array = Array(4)
+    def test_forward_full_insert(self, array_cls, test_values: list[int]):
+        array: Array = array_cls(len(test_values))
 
-        for value in values:
+        for value in test_values:
             array.insert(value, 0)
 
-        assert array.to_list() == [3, 2, 1, 0]
+        test_values.sort(reverse=True)
+        assert array.to_list() == test_values
 
-    def test_consecutive_full_insert(self):
-        values = list(range(4))
-        array = Array(4)
+    def test_consecutive_full_insert(self, array_cls, test_values):
+        array: Array = array_cls(len(test_values))
 
-        for index in range(len(values)):
-            array.insert(values[index], index)
+        for index in range(len(test_values)):
+            array.insert(test_values[index], index)
 
-        assert array.to_list() == values
+        assert array.to_list() == test_values
 
-    def test_middle_insert(self):
-        array = Array(4)
-        array.push(0)
-        array.push(0)
-        array.push(0)
-        array.insert(1, 2)
+    def test_push_insert(self, array_cls, test_values):
+        array: Array = array_cls(len(test_values))
 
-        assert array.to_list() == [0, 0, 1, 0]
+        for index in range(len(test_values)):
+            mode = random.random()
+            if mode >= 0.5:
+                array.push(test_values[index])
+            else:
+                array.insert(test_values[index], index)
 
-    def test_forward_insert(self):
-        array = Array(4)
-        array.push(0)
-        array.push(0)
-        array.push(0)
-        array.insert(1, 0)
+        assert array.to_list() == test_values
 
-        assert array.to_list() == [1, 0, 0, 0]
+    def test_forward_insert(
+        self,
+        array_cls,
+        test_values: list[int],
+        dop_values: list[int],
+    ):
+        array: Array = array_cls(len(test_values) + len(dop_values))
 
-    def test_back_insert(self):
-        array = Array(4)
-        array.push(0)
-        array.push(0)
-        array.push(0)
-        array.insert(1, 3)
+        for value in test_values:
+            array.push(value)
 
-        assert array.to_list() == [0, 0, 0, 1]
+        for value in dop_values:
+            array.insert(value, 0)
 
-    def test_get(self, full_array: Array, test_values: list[int]):
+        dop_values.sort(reverse=True)
+        assert array.to_list() == dop_values + test_values
+
+    def test_back_insert(
+        self,
+        array_cls,
+        test_values: list[int],
+        dop_values: list[int],
+    ):
+        array: Array = array_cls(len(test_values) + len(dop_values))
+
+        for value in test_values:
+            array.push(value)
+
+        index = len(test_values)
+        for value in dop_values:
+            array.insert(value, index)
+            index += 1
+
+        assert array.to_list() == test_values + dop_values
+
+    def test_get(
+        self,
+        full_array: Array,
+        test_values: list[int],
+    ):
         for index in range(len(test_values)):
             assert test_values[index] == full_array.get(index)
 
@@ -94,42 +123,69 @@ class TestArray:
             assert test_values[-index] == full_array.remove(len(full_array) - 1)
 
     def test_middle_remove(self, full_array: Array):
-        val = full_array.remove(1)
-        assert val == 1
-        assert full_array.to_list() == [0, 2, 3]
+        lst = full_array.to_list()
 
+        target = full_array.get(1)
         val = full_array.remove(1)
-        assert val == 2
-        assert full_array.to_list() == [0, 3]
+        assert val == target
+        lst.pop(1)
+        assert full_array.to_list() == lst
+
+        target = full_array.get(1)
+        val = full_array.remove(1)
+        assert val == target
+        lst.pop(1)
+        assert full_array.to_list() == lst
 
     @pytest.mark.xfail
-    def test_limit_push(self, full_array: Array):
+    def test_limit_push_fail(self, full_array: Array):
         full_array.push(0)
 
     @pytest.mark.xfail
-    def test_limit_insert(self, full_array: Array):
+    def test_limit_insert_fail(self, full_array: Array):
         full_array.insert(0, 0)
 
     @pytest.mark.xfail
-    def test_overflow_index_insert(self):
-        array = Array(4)
-        array.insert(0, 4)
+    def test_overflow_index_insert_fail(self, full_array: Array):
+        full_array.insert(0, len(full_array) + 1)
 
     @pytest.mark.xfail
-    def test_inappropriate_index_insert(self):
-        array = Array(4)
+    def test_inappropriate_index_insert_fail(self, array_cls, test_values):
+        array: Array = array_cls(len(test_values))
         array.insert(0, 2)
 
     @pytest.mark.xfail
-    def test_inapppropriate_index_get(self, full_array: Array):
-        full_array.get(5)
+    def test_inapppropriate_index_get_fail(self, full_array: Array):
+        full_array.get(len(full_array) + 1)
 
     @pytest.mark.xfail
-    def test_inapppropriate_pop(self, full_array: Array):
-        for _ in range(5):
+    def test_inapppropriate_pop_fail(self, full_array: Array):
+        for _ in range(len(full_array)):
             full_array.pop()
+        full_array.pop()
 
     @pytest.mark.xfail
-    def test_inapppropriate_remove(self, full_array: Array):
-        for _ in range(5):
+    def test_inapppropriate_remove_fail(self, full_array: Array):
+        for _ in range(len(full_array)):
             full_array.remove(0)
+        full_array.remove(0)
+
+
+class TestArray(BaseTestArray):
+    @pytest.fixture
+    def array_cls(self):
+        return Array
+
+
+class TestDynamicArray(BaseTestArray):
+    @pytest.fixture
+    def array_cls(self):
+        return DynamicArray
+
+    def test_limit_push_fail(self, full_array: Array):
+        # should pass in d_arr
+        full_array.push(0)
+
+    def test_limit_insert_fail(self, full_array: Array):
+        # should pass in d_arr
+        full_array.insert(0, 0)

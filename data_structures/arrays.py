@@ -1,6 +1,6 @@
 from functools import wraps
 from typing import Union
-from memory_model import Memory, MemoryCell, EmptyMemoryCell
+from memory_model import Memory, MemoryCell
 
 
 class Array(object):
@@ -24,13 +24,13 @@ class Array(object):
         self.low_bound = self.memory.allocate()
         self.high_bound = self.low_bound + self.size
 
-    def _size_check_func(self):
+    def _size_check_func(self) -> None:
         """Function used in '_size_check' decorator"""
 
         if self.count >= self.size:
             raise OverflowError("Array overflow")
 
-    def _size_check(func):
+    def _size_check(func) -> callable:
         """Array size check decorator"""
 
         @wraps(func)
@@ -41,7 +41,7 @@ class Array(object):
 
         return wrapper
 
-    def _index_checkout(self, index: int):
+    def _index_checkout(self, index: int) -> None:
         """Index value checkout"""
 
         if not isinstance(index, int):
@@ -164,10 +164,10 @@ class DynamicArray(Array):
         super().__init__(size)
         self._dynamic_raise = dynamic_raise
 
-    def __reallocate_memory(self):
+    def __reallocate_memory(self) -> None:
         """Reallocation function special for dynamic array"""
 
-        print("Start reallocation process")
+        # print("Start reallocation process")
 
         tempo_low_bound = self.low_bound
         tempo_high_bound = self.high_bound
@@ -188,7 +188,7 @@ class DynamicArray(Array):
         del tempo_high_bound
         del tempo_memory
 
-    def _size_check_func(self):
+    def _size_check_func(self) -> None:
         if self.count >= self.size:
             self.__reallocate_memory()
 
@@ -233,15 +233,12 @@ class SortedArray(object):
 
 
 if __name__ == "__main__":
-    array = Array(4)
+    array = SortedArray(4)
 
-    array.push(0)
     array.push(1)
+    array.push(3)
+    array.push(6)
     array.push(2)
+    array.push(0)
 
-    print(array.remove(0))
-    print(array.remove(0))
-    print(array.remove(0))
-    print(array.remove(0))
-
-    print(array.memory.storage)
+    print(array)

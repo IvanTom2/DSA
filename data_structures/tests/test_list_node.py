@@ -1,336 +1,213 @@
 import sys
+import pytest
+import random
 from pathlib import Path
 from typing import Union
 from functools import reduce
 
 
 sys.path.append(str(Path(__file__).parent.parent))
-from list_node import (
-    AbstractSinglyListNode,
-    ClassicSinglyListNode,
-    AdvancedSinglyListNode,
-    AdvancedDoublyListNode,
+from linked_list import (
+    AbstractSinglyLinkedList,
+    ClassicSinglyLinkedList,
+    AdvancedSinglyLinkedList,
+    AdvancedDoublyLinkedList,
     SinglyNode,
     DoublyNode,
 )
 
 
-def compare_to_list(
-    listNode: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ],
-    massive: list,
-    reverse_massive: bool = False,
-):
-    if reverse_massive:
-        if isinstance(massive, list):
-            massive.reverse()
-        else:
-            massive = list(massive)
-            massive.reverse()
+class BaseLinkedListTest(object):
+    @pytest.fixture
+    def linked_list_cls(self) -> ClassicSinglyLinkedList:
+        return ClassicSinglyLinkedList
 
-    mList = map(lambda x: x.value, listNode)
-    result = map(lambda x: x[0] - x[1], zip(mList, massive))
-    assert set(result) == set([0])
+    @pytest.fixture
+    def test_values(self):
+        return list(range(4))
 
+    def test_add_head(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
-def add_head_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    for adds in range(1, 6):
-        listNode: ClassicSinglyListNode = listNodeClass()
-        for add in range(1, adds):
-            listNode.add_head(SinglyNode(add))
-            compare_to_list(
-                listNode,
-                range(1, add + 1),
-                reverse_massive=True,
-            )
+        for value in test_values:
+            linked_list.add_head(SinglyNode(value))
 
+        test_values.sort(reverse=True)
+        assert linked_list.to_list() == test_values
 
-def add_back_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    for adds in range(1, 6):
-        listNode: ClassicSinglyListNode = listNodeClass()
-        for add in range(1, adds):
-            listNode.add_back(SinglyNode(add))
-            compare_to_list(
-                listNode,
-                range(1, add + 1),
-                reverse_massive=False,
-            )
+    def test_add_back(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
+        for value in test_values:
+            linked_list.add_back(SinglyNode(value))
 
-def add_head_back_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.add_head(SinglyNode(0))
-    listNode.add_head(SinglyNode(1))
-    listNode.add_back(SinglyNode(2))
-    listNode.add_back(SinglyNode(3))
-    listNode.add_head(SinglyNode(4))
-    compare_to_list(listNode, [4, 1, 0, 2, 3])
+        assert linked_list.to_list() == test_values
 
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.add_back(SinglyNode(0))
-    listNode.add_back(SinglyNode(1))
-    listNode.add_back(SinglyNode(2))
-    listNode.add_back(SinglyNode(3))
-    listNode.add_head(SinglyNode(4))
-    compare_to_list(listNode, [4, 0, 1, 2, 3])
+    def test_add_head_back(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
+        compare_list = []
+        for value in test_values:
+            mode = random.random()
+            if mode >= 0.5:
+                linked_list.add_back(value)
+                compare_list.append(value)
+            else:
+                linked_list.add_head(value)
+                compare_list.insert(0, value)
 
-def insert_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ],
-    nodeClass: Union[
-        SinglyNode,
-        DoublyNode,
-    ],
-):
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.insert(nodeClass(0), 0)
-    listNode.insert(nodeClass(1), 0)
-    listNode.insert(nodeClass(2), 0)
-    listNode.insert(nodeClass(3), 0)
-    compare_to_list(listNode, [3, 2, 1, 0])
+        assert linked_list.to_list() == compare_list
 
-    listNode.insert(nodeClass(4), 2)
-    listNode.insert(nodeClass(5), 4)
-    listNode.insert(nodeClass(6), 0)
-    listNode.insert(nodeClass(7), 5)
+    def test_forward_full_insert(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
-    # print(listNode)
+        for value in test_values:
+            linked_list.insert(value, 0)
 
-    compare_to_list(listNode, [6, 3, 2, 4, 1, 7, 5, 0])
+        test_values.sort(reverse=True)
+        assert linked_list.to_list() == test_values
 
+    def test_forward_insert(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
-def find_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    massive = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.from_list(massive)
+        for value in test_values[:-1]:
+            linked_list.add_back(value)
 
-    nodes = []
-    for index in range(len(massive)):
-        node = listNode.find(index)
-        nodes.append(node)
+        linked_list.insert(test_values[-1], 0)
+        assert linked_list.to_list() == [test_values[-1]] + test_values[:-1]
 
-    nodes = map(lambda x: x.value, nodes)
-    result = map(lambda x: x[0] - x[1], zip(nodes, massive))
-    assert set(result) == set([0])
+    def test_find(self, linked_list_cls, test_values):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
 
+        for index in range(len(test_values)):
+            node = linked_list.find(index)
+            assert node.value == test_values[index]
 
-def delpos_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    massive = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    def test_delpos(self, linked_list_cls, test_values):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
+        [linked_list.delpos(0) for _ in range(len(test_values))]
+        assert len(linked_list.to_list()) == 0
 
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.from_list(massive)
-    [listNode.delpos(0) for _ in range(len(massive))]
-    assert not listNode.to_list()
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
+        index = len(test_values) - 1
+        while index >= 0:
+            linked_list.delpos(index)
+            index -= 1
+        assert len(linked_list.to_list()) == 0
 
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.from_list(massive)
-    index = len(massive) - 1
-    while index >= 0:
-        listNode.delpos(index)
-        index -= 1
-    assert not listNode.to_list()
+    def test_random_delpos(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
 
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.from_list(massive)
-    listNode.delpos(0)
-    listNode.delpos(9)
-    listNode.delpos(4)
-    listNode.delpos(6)
+        indexes_to_del = random.sample(
+            range(len(test_values) - 1),
+            len(test_values) // 2,
+        )
 
-    mList = listNode.to_list()
-    result = map(lambda x: x[0] - x[1], zip(mList, [1, 2, 3, 4, 6, 7, 9]))
-    assert set(result) == set([0])
+        for index in indexes_to_del:
+            test_values.pop(index)
+            linked_list.delpos(index)
+
+            assert linked_list.to_list() == test_values
+
+    def test_delval(self, linked_list_cls, test_values):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
+        [linked_list.delval(value) for value in test_values]
+        assert len(linked_list.to_list()) == 0
+
+    def test_random_delval(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
+
+        values = random.sample(test_values, len(test_values) // 2)
+        for value in values:
+            test_values.remove(value)
+            linked_list.delval(value, 1)
+
+        assert linked_list.to_list() == test_values
+
+    def test_reverse(self, linked_list_cls, test_values: list[int]):
+        linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list.from_list(test_values)
+
+        test_values.reverse()
+        linked_list.reverse()
+
+        assert test_values == linked_list.to_list()
+
+    def test_merge(self, linked_list_cls):
+        massive1 = [0, 1, 2]
+        massive2 = [3, 4, 5]
+        massive3 = [6, 7, 8]
+        massive4 = [9, 10, 11]
+        mTarget = []
+
+        main_linked_list: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list1: ClassicSinglyLinkedList = linked_list_cls()
+        linked_list2: ClassicSinglyLinkedList = linked_list_cls()
+
+        CSLL = ClassicSinglyLinkedList()
+        ASLL = AdvancedSinglyLinkedList()
+
+        linked_list1.from_list(massive1)
+        linked_list2.from_list(massive2)
+        CSLL.from_list(massive3)
+        ASLL.from_list(massive4)
+
+        main_linked_list.merge(linked_list1)
+        mTarget += massive1
+        assert main_linked_list.to_list() == mTarget
+
+        main_linked_list.merge(linked_list2)
+        mTarget += massive2
+        assert main_linked_list.to_list() == mTarget
+
+        main_linked_list.merge(CSLL)
+        mTarget += massive3
+        assert main_linked_list.to_list() == mTarget
+
+        main_linked_list.merge(ASLL)
+        mTarget += massive4
+        assert main_linked_list.to_list() == mTarget
 
 
-def delval_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    def _delval_test(massive: list[int]) -> None:
-        listNode: ClassicSinglyListNode = listNodeClass()
-        listNode.from_list(massive)
-        [listNode.delval(value) for value in massive]
-        assert not listNode.to_list()
-
-    massive = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    _delval_test(massive)
-
-    massive = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
-    _delval_test(massive)
-
-    massive = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    _delval_test(massive)
+class TestClassicLinkedList(BaseLinkedListTest):
+    @pytest.fixture
+    def linked_list_cls(self) -> ClassicSinglyLinkedList:
+        return ClassicSinglyLinkedList
 
 
-def reverse_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    massive = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    listNode: ClassicSinglyListNode = listNodeClass()
-    listNode.from_list(massive)
-
-    massive.reverse()
-    listNode.reverse()
-
-    print(listNode)
-
-    assert massive == listNode.to_list()
+class TestAdvancedLinkedList(BaseLinkedListTest):
+    @pytest.fixture
+    def linked_list_cls(self) -> AdvancedSinglyLinkedList:
+        return AdvancedSinglyLinkedList
 
 
-def merge_sll_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    massive1 = [0, 1, 2]
-    massive2 = [3, 4, 5]
-    massive3 = [6, 7, 8]
-    massive4 = [9, 10, 11]
-    mTarget = []
+class TestDoublyLinkedList(BaseLinkedListTest):
+    @pytest.fixture
+    def linked_list_cls(self) -> AdvancedDoublyLinkedList:
+        return AdvancedDoublyLinkedList
 
-    mainNode: ClassicSinglyListNode = listNodeClass()
-    listNode1: ClassicSinglyListNode = listNodeClass()
-    listNode2: ClassicSinglyListNode = listNodeClass()
+    def test_merge(self, linked_list_cls):
+        massive1 = [0, 1, 2]
+        massive2 = [3, 4, 5]
+        mTarget = []
 
-    CSLL = ClassicSinglyListNode()
-    ASLL = AdvancedSinglyListNode()
+        mainNode: AdvancedDoublyLinkedList = linked_list_cls()
+        listNode1: AdvancedDoublyLinkedList = linked_list_cls()
+        listNode2: AdvancedDoublyLinkedList = linked_list_cls()
 
-    listNode1.from_list(massive1)
-    listNode2.from_list(massive2)
-    CSLL.from_list(massive3)
-    ASLL.from_list(massive4)
+        listNode1.from_list(massive1)
+        listNode2.from_list(massive2)
 
-    mainNode.merge(listNode1)
-    mTarget += massive1
-    assert mainNode.to_list() == mTarget
+        mainNode.merge(listNode1)
+        mTarget += massive1
+        assert mainNode.to_list() == mTarget
 
-    mainNode.merge(listNode2)
-    mTarget += massive2
-    assert mainNode.to_list() == mTarget
-
-    mainNode.merge(CSLL)
-    mTarget += massive3
-    assert mainNode.to_list() == mTarget
-
-    mainNode.merge(ASLL)
-    mTarget += massive4
-    assert mainNode.to_list() == mTarget
-
-
-def merge_dll_tests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ]
-):
-    massive1 = [0, 1, 2]
-    massive2 = [3, 4, 5]
-    mTarget = []
-
-    mainNode: AdvancedDoublyListNode = listNodeClass()
-    listNode1: AdvancedDoublyListNode = listNodeClass()
-    listNode2: AdvancedDoublyListNode = listNodeClass()
-
-    listNode1.from_list(massive1)
-    listNode2.from_list(massive2)
-
-    mainNode.merge(listNode1)
-    mTarget += massive1
-    assert mainNode.to_list() == mTarget
-
-    mainNode.merge(listNode2)
-    mTarget += massive2
-    assert mainNode.to_list() == mTarget
-
-
-def listNodeTests(
-    listNodeClass: Union[
-        ClassicSinglyListNode,
-        AdvancedSinglyListNode,
-        AdvancedDoublyListNode,
-    ],
-    nodeClass: Union[
-        SinglyNode,
-        DoublyNode,
-    ],
-) -> None:
-    add_head_tests(listNodeClass)
-    add_back_tests(listNodeClass)
-    add_head_back_tests(listNodeClass)
-    find_tests(listNodeClass)
-    insert_tests(listNodeClass, nodeClass)
-    delpos_tests(listNodeClass)
-    delval_tests(listNodeClass)
-    reverse_tests(listNodeClass)
-
-    if isinstance(listNodeClass, ClassicSinglyListNode):
-        merge_sll_tests(listNodeClass)
-    elif isinstance(listNodeClass, AdvancedSinglyListNode):
-        merge_sll_tests(listNodeClass)
-    else:
-        merge_dll_tests(listNodeClass)
-
-
-def test_CSLL():
-    listNodeTests(ClassicSinglyListNode, SinglyNode)
-
-
-def test_ASLL():
-    listNodeTests(AdvancedSinglyListNode, SinglyNode)
-
-
-def test_ADLL():
-    listNodeTests(AdvancedDoublyListNode, DoublyNode)
-
-
-if __name__ == "__main__":
-    test_CSLL()
-    test_ASLL()
-    test_ADLL()
+        mainNode.merge(listNode2)
+        mTarget += massive2
+        assert mainNode.to_list() == mTarget
