@@ -2,6 +2,8 @@ from abc import ABC
 from typing import Any, Union
 from functools import wraps
 
+from _base import ListInterface
+
 
 class AbstractNode(ABC):
     def __init__(self, value: Any, next=None) -> None:
@@ -44,7 +46,7 @@ class AbstractDoublyLinkedList(ABC):
         self.head: DoublyNode = head
 
 
-class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
+class ClassicSinglyLinkedList(AbstractSinglyLinkedList, ListInterface):
     """Classical SLL (Singly Linked List)"""
 
     def __init__(self, head_node: Union[SinglyNode, Any] = None) -> None:
@@ -81,16 +83,16 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
         else:
             raise ValueError(f"Can't merge singly linked list and {otherSLL.__class__}")
 
-    def add_head(self, node: Union[SinglyNode, Any]) -> None:
-        node = self._nodify(node)
+    def add_head(self, value: Union[SinglyNode, Any]) -> None:
+        node = self._nodify(value)
         if self.head is None:
             self.head = node
         else:
             node.next = self.head
             self.head = node
 
-    def add_back(self, node: Union[SinglyNode, Any]) -> None:
-        node = self._nodify(node)
+    def push(self, value: Union[SinglyNode, Any]) -> None:
+        node = self._nodify(value)
 
         if self.head is None:
             self.head = node
@@ -98,10 +100,14 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
             tail = self._find_tail()
             tail.next = node
 
-    def _insert(self, node: Union[SinglyNode, Any], position: int) -> None:
-        node = self._nodify(node)
+    def _insert(
+        self,
+        value: Union[SinglyNode, Any],
+        index: int,
+    ) -> None:
+        node = self._nodify(value)
 
-        prevNode = self.find(position - 1)
+        prevNode = self.find_node(index - 1)
         nextNode = prevNode.next
 
         prevNode.next = node
@@ -109,34 +115,53 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
 
     def insert(
         self,
-        node: Union[SinglyNode, Any],
-        position: int,
+        value: Union[SinglyNode, Any],
+        index: int,
     ) -> None:
-        if position == 0:
-            self.add_head(node)
+        if index == 0:
+            self.add_head(value)
         else:
-            self._insert(node, position)
+            self._insert(value, index)
 
-    def delpos(
+    def pop(self):
+        if not self.head:
+            raise IndexError("pop from an empty list")
+
+        node = self.head
+        if node.next is None:
+            value = node.value
+            self.head = None
+
+        else:
+            while node.next.next is not None:
+                node = node.next
+            value = node.next.value
+            self._del(node.next)
+            node.next = None
+
+        return value
+
+    def remove(
         self,
-        position: int = None,
+        index: int = None,
     ) -> SinglyNode:
-        if position == 0:
+        if index == 0:
             oldHead = self.head
+            value = oldHead.value
             self.head = oldHead.next
-            return oldHead
         else:
-            prevNode = self.find(position - 1)
+            prevNode = self.find_node(index - 1)
+            value = prevNode.next.value
             self._del(prevNode)
-            return prevNode
+        return value
 
-    def delval(
+    def remove_value(
         self,
-        node: Union[SinglyNode, Any],
-        maxdel: int = 0,
-    ) -> None:
+        value: Union[SinglyNode, Any],
+        n: int = 1,
+    ) -> list[int]:
         delcount = 0
-        node = self._nodify(node)
+        node = self._nodify(value)
 
         prevNode = None
         iterNode = self.head
@@ -148,12 +173,12 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
                 prevNode = iterNode
                 iterNode = iterNode.next
 
-            if maxdel and delcount >= maxdel:
+            if n and delcount >= n:
                 break
 
-    def find(self, position: int) -> SinglyNode:
+    def find_node(self, index: int) -> SinglyNode:
         node = self.head
-        for _ in range(position):
+        for _ in range(index):
             if node.next:
                 node = node.next
             else:
@@ -173,6 +198,33 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
 
         self.head = prev
 
+    def get(self, index: int) -> int:
+        node = self.head
+        for _ in range(index):
+            node = node.next
+
+        if node is None:
+            raise IndexError("Index out of bound")
+
+        return node.value
+
+    def find(self, value: int) -> int:
+        index = 0
+        node = self.head
+
+        while node is not None and node.value != value:
+            index += 1
+            node = node.next
+
+        if node is None:
+            return None
+        else:
+            return index
+
+    def replace(self, value: int, index: int) -> None:
+        node = self.find_node(index)
+        node.value = value
+
     def merge(self, otherSLL: AbstractSinglyLinkedList) -> None:
         self._check_class(otherSLL)
 
@@ -183,16 +235,16 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
             tail = self._find_tail()
             tail.next = otherSLL.head
 
-    def from_list(self, massive: list) -> None:
+    def from_list(self, array: list) -> None:
         """Adding elements of massive to tail of List Node"""
 
         start_index = 0
         if not self.head:
-            self.add_head(massive[0])
+            self.add_head(array[0])
             start_index += 1
 
-        for index in range(start_index, len(massive)):
-            self.add_back(massive[index])
+        for index in range(start_index, len(array)):
+            self.push(array[index])
 
     def to_list(self) -> list[SinglyNode]:
         massive = []
@@ -211,6 +263,24 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList):
                 node = node.next
 
         return generator()
+
+    def __len__(self) -> int:
+        length = 0
+        node = self.head
+        while node is not None:
+            node = node.next
+            length += 1
+        return length
+
+    def __add__(self, otherSLL: AbstractSinglyLinkedList) -> None:
+        self.merge(otherSLL)
+        return self
+
+    def __getitem__(self, index: int) -> int:
+        return self.get(index)
+
+    def __setitem__(self, index: int, value: int) -> int:
+        self.replace(value, index)
 
     def __iter__(self):
         self.cur_node = self.head
@@ -266,8 +336,8 @@ class AdvancedSinglyLinkedList(ClassicSinglyLinkedList):
             node = node.next
         return counter, tail
 
-    def add_head(self, node: Union[SinglyNode, Any]):
-        node = self._nodify(node)
+    def add_head(self, value: Union[SinglyNode, Any]):
+        node = self._nodify(value)
         if self.head is None:
             self.head = node
             self.tail = self.head
@@ -276,24 +346,58 @@ class AdvancedSinglyLinkedList(ClassicSinglyLinkedList):
             self.head = node
         self._increment()
 
-    def add_back(self, node: Union[SinglyNode, Any]) -> None:
+    def push(self, value: Union[SinglyNode, Any]) -> None:
         """This method return the Error if in the ListNode there isn't head"""
-        node = self._nodify(node)
+        node = self._nodify(value)
         if self.tail is None:
             self.add_head(node)
         else:
             self.tail.next = node
             self.tail = self.tail.next
-        self._increment()
+            self._increment()
 
-    def find(self, position: int) -> SinglyNode:
-        if position >= self.len:
+    def pop(self):
+        if not self.head:
+            raise IndexError("pop from an empty list")
+
+        node = self.head
+        if node.next is None:
+            value = node.value
+            self.head = None
+            self._decrement()
+
+        else:
+            while node.next.next is not None:
+                node = node.next
+            value = node.next.value
+            self._del(node.next)
+            node.next = None
+
+        return value
+
+    def remove(
+        self,
+        index: int = None,
+    ) -> SinglyNode:
+        if index == 0:
+            oldHead = self.head
+            value = oldHead.value
+            self.head = oldHead.next
+            self._decrement()
+        else:
+            prevNode = self.find_node(index - 1)
+            value = prevNode.next.value
+            self._del(prevNode)
+        return value
+
+    def find_node(self, index: int) -> SinglyNode:
+        if index >= self.len:
             raise ValueError("Position > len(ListNode)")
-        elif position == self.len - 1:
+        elif index == self.len - 1:
             return self.tail
         else:
             node = self.head
-            for _ in range(position):
+            for _ in range(index):
                 if node.next:
                     node = node.next
                 else:
@@ -301,14 +405,26 @@ class AdvancedSinglyLinkedList(ClassicSinglyLinkedList):
 
             return node
 
+    def insert(
+        self,
+        value: Union[SinglyNode, Any],
+        index: int,
+    ) -> None:
+        if index == 0:
+            self.add_head(value)
+        elif index == self.len:
+            self.push(value)
+        else:
+            self._insert(value, index)
+
     def _insert(
         self,
-        node: Union[SinglyNode, Any],
-        position: int,
+        value: Union[SinglyNode, Any],
+        index: int,
     ) -> None:
-        node = self._nodify(node)
+        node = self._nodify(value)
 
-        prevNode = self.find(position - 1)
+        prevNode = self.find_node(index - 1)
         nextNode = prevNode.next
 
         prevNode.next = node
@@ -340,6 +456,9 @@ class AdvancedSinglyLinkedList(ClassicSinglyLinkedList):
             self.tail.next = otherSLL.head
             self.tail = other_tail
             self._increment(other_len)
+
+    def __len__(self) -> int:
+        return self.len
 
 
 class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedList):
@@ -402,8 +521,8 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
         else:
             raise ValueError(f"Can't merge singly linked list and {otherDLL.__class__}")
 
-    def add_head(self, node: Union[DoublyNode, Any]) -> None:
-        node = self._nodify(node)
+    def add_head(self, value: Union[DoublyNode, Any]) -> None:
+        node = self._nodify(value)
         if self.head is None:
             self.head = node
             self.tail = self.head
@@ -414,8 +533,8 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
 
         self._increment()
 
-    def add_back(self, node: Union[DoublyNode, Any]) -> None:
-        node = self._nodify(node)
+    def push(self, value: Union[DoublyNode, Any]) -> None:
+        node = self._nodify(value)
         if self.tail is None:
             self.add_head(node)
         else:
@@ -425,7 +544,7 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
             self.tail = self.tail.next
             self.tail.prev = prev
 
-        self._increment()
+            self._increment()
 
     def _traversal(self, position: int) -> DoublyNode:
         forward_paces, backward_paces = self._forward_backward(position)
@@ -435,24 +554,24 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
         node = self._ftrav(paces) if forward else self._btrav(paces - 1)
         return node
 
-    def find(self, position: int) -> DoublyNode:
-        if (position >= self.len) or (position < 0 and position < -self.len):
+    def find_node(self, index: int) -> DoublyNode:
+        if (index >= self.len) or (index < 0 and index < -self.len):
             raise ValueError("Position > len(ListNode)")
-        elif (position == self.len - 1) or (position == -1):
+        elif (index == self.len - 1) or (index == -1):
             return self.tail
-        elif (position == 0) or (position == -self.len):
+        elif (index == 0) or (index == -self.len):
             return self.head
         else:
-            return self._traversal(position)
+            return self._traversal(index)
 
     def _insert(
         self,
-        node: Union[DoublyNode, Any],
-        position: int,
+        value: Union[DoublyNode, Any],
+        index: int,
     ) -> None:
-        node = self._nodify(node)
+        node = self._nodify(value)
 
-        prevNode: DoublyNode = self.find(position - 1)
+        prevNode: DoublyNode = self.find_node(index - 1)
         nextNode: DoublyNode = prevNode.next
 
         prevNode.next = node
@@ -463,14 +582,14 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
 
         self._increment()
 
-    def delpos(
+    def remove(
         self,
-        position: int = None,
+        index: int = None,
     ) -> SinglyNode:
-        if (position >= self.len) or (position < 0 and position < -self.len):
+        if (index >= self.len) or (index < 0 and index < -self.len):
             raise ValueError("Position > len(ListNode)")
 
-        elif (position == 0) or (position == -self.len):
+        elif (index == 0) or (index == -self.len):
             oldHead = self.head
             nextNode: DoublyNode = oldHead.next
 
@@ -479,9 +598,9 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
 
             self.head = nextNode
             self._decrement()
-            return oldHead
+            return oldHead.value
 
-        elif (position == self.len - 1) or (position == -1):
+        elif (index == self.len - 1) or (index == -1):
             oldTail = self.tail
             prevNode: DoublyNode = oldTail.prev
 
@@ -490,14 +609,15 @@ class AdvancedDoublyLinkedList(AdvancedSinglyLinkedList, AbstractDoublyLinkedLis
 
             self.tail = prevNode
             self._decrement()
-            return oldTail
+            return oldTail.value
 
         else:
-            position = position - 1 if position >= 0 else position - 1
-            prevNode = self.find(position)
+            index = index - 1 if index >= 0 else index - 1
+            prevNode = self.find_node(index)
+            value = prevNode.next.value
 
             node = self._del(prevNode)
-            return node
+            return value
 
     def merge(self, otherDLL: AbstractDoublyLinkedList) -> None:
         self._check_class(otherDLL)
@@ -615,8 +735,3 @@ def fast_test_backward_delpos(list_cls=ClassicSinglyLinkedList):
         print(values, lst.to_list())
         index -= 1
 
-
-if __name__ == "__main__":
-    list_cls = AdvancedDoublyLinkedList
-    fast_test_forward_delpos(list_cls)
-    fast_test_backward_delpos(list_cls)

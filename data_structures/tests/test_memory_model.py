@@ -1,4 +1,4 @@
-import base
+import test_base_interface as test_base_interface
 from memory_model import Memory, NotAllowedMemoryCell, MemoryCell, EmptyMemoryCell
 import pytest
 

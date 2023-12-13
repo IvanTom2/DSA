@@ -35,22 +35,22 @@ class BaseLinkedListTest(object):
         test_values.sort(reverse=True)
         assert linked_list.to_list() == test_values
 
-    def test_add_back(self, linked_list_cls, test_values: list[int]):
+    def test_push(self, linked_list_cls, test_values: list[int]):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
         for value in test_values:
-            linked_list.add_back(SinglyNode(value))
+            linked_list.push(SinglyNode(value))
 
         assert linked_list.to_list() == test_values
 
-    def test_add_head_back(self, linked_list_cls, test_values: list[int]):
+    def test_add_head_push(self, linked_list_cls, test_values: list[int]):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
         compare_list = []
         for value in test_values:
             mode = random.random()
             if mode >= 0.5:
-                linked_list.add_back(value)
+                linked_list.push(value)
                 compare_list.append(value)
             else:
                 linked_list.add_head(value)
@@ -71,7 +71,7 @@ class BaseLinkedListTest(object):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
 
         for value in test_values[:-1]:
-            linked_list.add_back(value)
+            linked_list.push(value)
 
         linked_list.insert(test_values[-1], 0)
         assert linked_list.to_list() == [test_values[-1]] + test_values[:-1]
@@ -81,24 +81,25 @@ class BaseLinkedListTest(object):
         linked_list.from_list(test_values)
 
         for index in range(len(test_values)):
-            node = linked_list.find(index)
-            assert node.value == test_values[index]
+            node: SinglyNode = linked_list.find_node(index)
+            value = node.value
+            assert value == test_values[index]
 
-    def test_delpos(self, linked_list_cls, test_values):
+    def test_remove(self, linked_list_cls, test_values):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
         linked_list.from_list(test_values)
-        [linked_list.delpos(0) for _ in range(len(test_values))]
+        [linked_list.remove(0) for _ in range(len(test_values))]
         assert len(linked_list.to_list()) == 0
 
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
         linked_list.from_list(test_values)
         index = len(test_values) - 1
         while index >= 0:
-            linked_list.delpos(index)
+            linked_list.remove(index)
             index -= 1
         assert len(linked_list.to_list()) == 0
 
-    def test_random_delpos(self, linked_list_cls, test_values: list[int]):
+    def test_random_remove(self, linked_list_cls, test_values: list[int]):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
         linked_list.from_list(test_values)
 
@@ -109,14 +110,14 @@ class BaseLinkedListTest(object):
 
         for index in indexes_to_del:
             test_values.pop(index)
-            linked_list.delpos(index)
+            linked_list.remove(index)
 
             assert linked_list.to_list() == test_values
 
     def test_delval(self, linked_list_cls, test_values):
         linked_list: ClassicSinglyLinkedList = linked_list_cls()
         linked_list.from_list(test_values)
-        [linked_list.delval(value) for value in test_values]
+        [linked_list.remove_value(value) for value in test_values]
         assert len(linked_list.to_list()) == 0
 
     def test_random_delval(self, linked_list_cls, test_values: list[int]):
@@ -126,7 +127,7 @@ class BaseLinkedListTest(object):
         values = random.sample(test_values, len(test_values) // 2)
         for value in values:
             test_values.remove(value)
-            linked_list.delval(value, 1)
+            linked_list.remove_value(value, 1)
 
         assert linked_list.to_list() == test_values
 

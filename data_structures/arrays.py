@@ -2,11 +2,13 @@ from functools import wraps
 from typing import Union
 from memory_model import Memory, MemoryCell
 
+from _base import ListInterface
 
-class Array(object):
+
+class StaticArray(ListInterface):
     """Array based on modeled class of Memory"""
 
-    def __init__(self, size: int) -> None:
+    def __init__(self, size: int = 4) -> None:
         # next variables from self.__allocate_memory()
         self.memory: Memory
         self.low_bound: int
@@ -35,7 +37,7 @@ class Array(object):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            arr: Array = args[0]
+            arr: StaticArray = args[0]
             arr._size_check_func()
             return func(*args, **kwargs)
 
@@ -133,9 +135,48 @@ class Array(object):
 
         return returning_value
 
+    def find(self, value: int) -> int:
+        for index in range(0, self.count):
+            retrieved = self.get(index)
+            if retrieved == value:
+                return index
+
+        return None
+
+    def remove_value(self, value: int, n: int = 1) -> list[int]:
+        deleted_values = []
+
+        while len(deleted_values) < n:
+            index = self.find(value)
+            if index is None:
+                break
+
+            deleted_values.append(self.remove(index))
+
+        return deleted_values
+
+    def reverse(self) -> None:
+        p1, p2 = 0, self.count - 1
+
+        while p1 < p2:
+            v1 = self.get(p1)
+            v2 = self.get(p2)
+
+            self.replace(v1, p2)
+            self.replace(v2, p1)
+
+            p1 += 1
+            p2 -= 1
+
+    def merge(self, other_array):
+        if isinstance(other_array, self.__class__):
+            for value in other_array:
+                self.push(value)
+        else:
+            raise ValueError(f"Can't merge Static Array and {other_array.__class__}")
+
     def to_list(self) -> list[int]:
         """Return Python List with current values"""
-
         return [self.get(i) for i in range(0, self.count)]
 
     def fill_from(self, source: Union[tuple, list]) -> None:
@@ -153,14 +194,21 @@ class Array(object):
     def __getitem__(self, index: int):
         return self.get(index)
 
+    def __setitem__(self, index: int, value: int) -> None:
+        self.replace(value, index)
+
+    def __add__(self, other_array):
+        self.merge(other_array)
+        return self
+
     def __repr__(self) -> str:
         return f"{[self._access(i) for i in range(0, self.count)]}"
 
 
-class DynamicArray(Array):
+class DynamicArray(StaticArray):
     """Dynamic Array based on modeled class of Memory"""
 
-    def __init__(self, size: int, dynamic_raise: int = 2) -> None:
+    def __init__(self, size: int = 4, dynamic_raise: int = 2) -> None:
         super().__init__(size)
         self._dynamic_raise = dynamic_raise
 
@@ -230,15 +278,3 @@ class SortedArray(object):
 
     def __repr__(self) -> str:
         return self._storage.__repr__()
-
-
-if __name__ == "__main__":
-    array = SortedArray(4)
-
-    array.push(1)
-    array.push(3)
-    array.push(6)
-    array.push(2)
-    array.push(0)
-
-    print(array)
