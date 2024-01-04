@@ -100,6 +100,9 @@ class ClassicSinglyLinkedList(AbstractSinglyLinkedList, ListInterface):
             tail = self._find_tail()
             tail.next = node
 
+    def append(self, value: Union[SinglyNode, Any]) -> None:
+        self.push(value)
+
     def _insert(
         self,
         value: Union[SinglyNode, Any],
@@ -734,4 +737,3 @@ def fast_test_backward_delpos(list_cls=ClassicSinglyLinkedList):
 
         print(values, lst.to_list())
         index -= 1
-
