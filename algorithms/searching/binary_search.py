@@ -32,9 +32,29 @@ def insert_binary_search(array: list[int], value: int) -> int:
     return low
 
 
+def bsrf(
+    array: list[int],
+    value: int,
+    low: int,
+    high: int,
+) -> int:
+    """binary search recursive function"""
+    mid = low + (high - low) // 2
+    if value == array[mid]:
+        return mid
+    if value < array[mid]:
+        srch = bsrf(array, value, low, mid)
+    else:
+        srch = bsrf(array, value, mid + 1, high)
+    output = srch if srch == value else None
+    return output
+
+
+def binary_search_resursive(array: list[int], value: int) -> int:
+    return bsrf(array, value, 0, len(array) - 1)
+
+
 if __name__ == "__main__":
     array = [0, 1, 2, 3, 4, 5]
 
-    # print(binary_search(array, 0))
-    pos = insert_binary_search(array, 7)
-    print(pos)
+    print(binary_search_resursive(array, 4))
