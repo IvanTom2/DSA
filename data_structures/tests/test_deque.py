@@ -29,7 +29,7 @@ class BaseTestDeque(object):
         for value in test_values:
             deque.push_front(value)
 
-        test_values.sort(reverse=True)
+        test_values.reverse()
         assert deque.to_list() == test_values
 
     def test_push_back(self, deque_cls, test_values: list[int]):
@@ -59,7 +59,7 @@ class BaseTestDeque(object):
         full_deque: DequeInterface,
         test_values: list[int],
     ):
-        test_values.sort(reverse=True)
+        test_values.reverse()
         while not full_deque.isEmpty():
             value = full_deque.pop_back()
             test_value = test_values.pop(0)

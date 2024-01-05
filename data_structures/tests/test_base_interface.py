@@ -64,7 +64,7 @@ class BaseTestInteface(object):
         for value in test_values:
             cont.insert(value, 0)
 
-        test_values.sort(reverse=True)
+        test_values.reverse()
         assert cont.to_list() == test_values
 
     def test_insert_full_backward(self, cont: ListInterface, test_values: list[int]):
@@ -84,7 +84,7 @@ class BaseTestInteface(object):
 
         v1 = test_values[:count]
         v2 = test_values[count:]
-        v2.sort(reverse=True)
+        v2.reverse()
 
         assert cont.to_list() == v2 + v1
 

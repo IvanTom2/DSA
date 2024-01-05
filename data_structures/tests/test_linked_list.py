@@ -28,7 +28,7 @@ class BaseLinkedListTest(object):
         for value in test_values:
             linked_list.add_head(SinglyNode(value))
 
-        test_values.sort(reverse=True)
+        test_values.reverse()
         assert linked_list.to_list() == test_values
 
     def test_push(self, linked_list_cls, test_values: list[int]):
@@ -60,7 +60,7 @@ class BaseLinkedListTest(object):
         for value in test_values:
             linked_list.insert(value, 0)
 
-        test_values.sort(reverse=True)
+        test_values.reverse()
         assert linked_list.to_list() == test_values
 
     def test_forward_insert(self, linked_list_cls, test_values: list[int]):

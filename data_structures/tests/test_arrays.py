@@ -43,7 +43,7 @@ class BaseTestArray(object):
         for value in test_values:
             array.insert(value, 0)
 
-        test_values.sort(reverse=True)
+        test_values.reverse()
         assert array.to_list() == test_values
 
     def test_consecutive_full_insert(self, array_cls, test_values):
@@ -80,7 +80,7 @@ class BaseTestArray(object):
         for value in dop_values:
             array.insert(value, 0)
 
-        dop_values.sort(reverse=True)
+        dop_values.reverse()
         assert array.to_list() == dop_values + test_values
 
     def test_back_insert(
