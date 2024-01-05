@@ -15,19 +15,6 @@ from queues import (
 )
 
 
-def compare(arr1: list, arr2: list) -> bool:
-    if len(arr1) != len(arr2):
-        return False
-    else:
-        index = 0
-        while index < len(arr1):
-            equal = arr1[index] == arr2[index]
-            if not equal:
-                return False
-            index += 1
-        return True
-
-
 class BaseTest(object):
     @pytest.fixture
     def queue_cls(self):
@@ -52,7 +39,7 @@ class BaseTest(object):
         for value in test_values:
             queue.enqueue(value)
 
-        assert compare(queue.to_list(), test_values)
+        assert queue.to_list() == test_values
 
     def test_dequeue(self, queue_cls, test_values: list[int]):
         queue: ListQueue = queue_cls()
@@ -71,7 +58,7 @@ class BaseTest(object):
             peeked = queue.peek()
             assert peeked == test_values[index]
 
-        assert compare(queue.to_list(), test_values)
+        assert queue.to_list() == test_values
 
     def test_isEmpty(self, queue_cls, test_values: list[int]):
         queue: ListQueue = queue_cls()

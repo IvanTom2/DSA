@@ -2,18 +2,14 @@ import sys
 import pytest
 import random
 from pathlib import Path
-from typing import Union
-from functools import reduce
 
 
 sys.path.append(str(Path(__file__).parent.parent))
 from linked_list import (
-    AbstractSinglyLinkedList,
     ClassicSinglyLinkedList,
     AdvancedSinglyLinkedList,
     AdvancedDoublyLinkedList,
     SinglyNode,
-    DoublyNode,
 )
 
 

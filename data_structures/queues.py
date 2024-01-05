@@ -139,6 +139,9 @@ class DynamicArrayLazyQueue(LazyQueueInterface):
 
         self._head = 0
 
+    def to_list(self) -> list[int]:
+        return self._storage.to_list()
+
 
 class SLLLazyQueue(DynamicArrayLazyQueue):
     def __init__(self) -> None:

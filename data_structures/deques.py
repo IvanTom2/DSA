@@ -1,32 +1,77 @@
-class BasicListDeque(object):
+from abc import abstractmethod
+from arrays import DynamicArray
+from linked_list import AdvancedSinglyLinkedList, AdvancedDoublyLinkedList
+
+
+class DequeInterface(object):
     def __init__(self) -> None:
-        self.__storage = []
+        self._storage = self._get_storage()
 
-    def addFirst(self, value: int) -> None:
-        self.__storage.append(value)
+    @abstractmethod
+    def _get_storage(self):
+        return []
 
-    def addLast(self, value: int) -> None:
-        self.__storage.insert(0, value)
+    def push_front(self, value: int) -> None:
+        self._storage.insert(0, value)
 
-    def getFirst(self) -> int:
-        self.__storage.pop(0)
+    def push_back(self, value: int) -> None:
+        self._storage.append(value)
 
-    def getLast(self) -> int:
-        self.__storage.pop()
+    def pop_front(self) -> int:
+        return self._storage.pop(0)
+
+    def pop_back(self) -> int:
+        return self._storage.pop()
 
     def __len__(self) -> int:
-        return len(self.__storage)
+        return len(self._storage)
+
+    def isEmpty(self):
+        return len(self) == 0
 
     def __repr__(self) -> str:
-        return f"{self.__storage}"
+        return f"{self._storage}"
+
+    def to_list(self) -> list[int]:
+        return self._storage
+
+
+class ListDeque(DequeInterface):
+    def _get_storage(self):
+        return []
+
+
+class DynamicArrayDeque(DequeInterface):
+    def _get_storage(self):
+        self._storage: DynamicArray
+        return DynamicArray()
+
+    def push_front(self, value: int) -> None:
+        self._storage.insert(value, 0)
+
+    def pop_front(self) -> int:
+        return self._storage.remove(0)
+
+    def to_list(self) -> list[int]:
+        return self._storage.to_list()
+
+
+class SLLDeque(DynamicArrayDeque):
+    def _get_storage(self):
+        return AdvancedSinglyLinkedList()
+
+
+class DLLDeque(DynamicArrayDeque):
+    def _get_storage(self):
+        return AdvancedDoublyLinkedList()
 
 
 if __name__ == "__main__":
-    deque = BasicListDeque()
+    deque = ListDeque()
+    values = [1, 2, 3, 4]
 
-    deque.addFirst(0)
-    deque.addLast(1)
-    deque.addFirst(2)
-    deque.addLast(3)
+    for value in values:
+        deque.push_back(value)
 
-    print(deque)
+    while not deque.isEmpty():
+        print(deque.pop_back())
